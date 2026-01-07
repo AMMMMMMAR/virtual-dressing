@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Your Recommendations - Virtual Fitting System{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Success Header -->
+    <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Scan Complete!</h1>
+        <p class="text-xl text-gray-600">Here are your personalized recommendations</p>
+    </div>
+
+    <!-- Measurements Card -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Your Measurements</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="text-center p-4 bg-indigo-50 rounded-xl">
+                <p class="text-sm text-gray-600 mb-1">Height</p>
+                <p class="text-2xl font-bold text-indigo-600">{{ body_scan.height }} cm</p>
+            </div>
+            <div class="text-center p-4 bg-purple-50 rounded-xl">
+                <p class="text-sm text-gray-600 mb-1">Chest</p>
+                <p class="text-2xl font-bold text-purple-600">{{ body_scan.chest }} cm</p>
+            </div>
+            <div class="text-center p-4 bg-pink-50 rounded-xl">
+                <p class="text-sm text-gray-600 mb-1">Waist</p>
+                <p class="text-2xl font-bold text-pink-600">{{ body_scan.waist }} cm</p>
+            </div>
+            <div class="text-center p-4 bg-rose-50 rounded-xl">
+                <p class="text-sm text-gray-600 mb-1">Shoulders</p>
+                <p class="text-2xl font-bold text-rose-600">{{ body_scan.shoulder_width }} cm</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white">
+            <h3 class="text-lg font-semibold mb-2">Recommended Size</h3>
+            <p class="text-4xl font-bold">{{ recommended_size }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-6 text-white">
+            <h3 class="text-lg font-semibold mb-2">Recommended Fit</h3>
+            <p class="text-4xl font-bold capitalize">{{ recommended_fit }}</p>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white">
+            <h3 class="text-lg font-semibold mb-2">Skin Tone</h3>
+            <p class="text-4xl font-bold capitalize">{{ body_scan.skin_tone }}</p>
+        </div>
+    </div>
+
+    <!-- Recommended Colors -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Recommended Colors for You</h2>
+        <div class="flex flex-wrap gap-4">
+            {% for color in recommended_colors %}
+            <div class="px-6 py-3 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full">
+                <span class="font-medium text-indigo-900">{{ color }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 3D Avatar Visualization -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">3D Avatar Preview</h2>
+        <div id="avatar-container" class="bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl"
+            style="height: 500px;">
+            <canvas id="avatar-canvas"></canvas>
+        </div>
+        <p class="text-sm text-gray-600 mt-4 text-center">
+            Use your mouse to rotate and zoom the 3D model
+        </p>
+    </div>
+
+    <!-- Recommended Products -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Recommended Products</h2>
+
+        {% if recommendations %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for rec in recommendations %}
+            <div class="border-2 border-gray-200 rounded-xl p-6 hover-lift">
+                <div
+                    class="aspect-square bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg mb-4 flex items-center justify-center">
+                    <svg class="w-24 h-24 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-lg text-gray-900 mb-2">{{ rec.product.name }}</h3>
+                <p class="text-gray-600 text-sm mb-3">{{ rec.product.description|truncatewords:15 }}</p>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-2xl font-bold text-indigo-600">${{ rec.product.price }}</span>
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                        Size {{ rec.recommended_size }}
+                    </span>
+                </div>
+                <a href="{% url 'fitting_system:product_detail' rec.product.id %}"
+                    class="block w-full bg-indigo-600 text-white text-center py-3 rounded-lg font-medium hover:bg-indigo-700 transition">
+                    View Details
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                </path>
+            </svg>
+            <p class="text-gray-600 text-lg">No products available matching your measurements at the moment.</p>
+            <p class="text-gray-500 mt-2">Please check back later or visit our store.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-4 justify-center">
+        <a href="{% url 'fitting_system:store' %}"
+            class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:shadow-lg transition transform hover:scale-105">
+            Browse All Products
+        </a>
+        <a href="{% url 'fitting_system:scan' %}"
+            class="bg-gray-500 text-white px-8 py-4 rounded-lg font-bold text-lg hover:shadow-lg transition">
+            Scan Another Customer
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Three.js for 3D Avatar -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Simple 3D Avatar using Three.js
+    let scene, camera, renderer, avatar;
+
+    function init3DAvatar() {
+        const container = document.getElementById('avatar-container');
+        const canvas = document.getElementById('avatar-canvas');
+
+        // Scene
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf3f4f6);
+
+        // Camera
+        camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        // Renderer
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // Create simple avatar
+        createAvatar();
+
+        // Animation loop
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', onWindowResize);
+
+        // Mouse controls
+        let mouseDown = false;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        canvas.addEventListener('mousedown', (e) => {
+            mouseDown = true;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            mouseDown = false;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (mouseDown && avatar) {
+                const deltaX = e.clientX - mouseX;
+                const deltaY = e.clientY - mouseY;
+
+                avatar.rotation.y += deltaX * 0.01;
+                avatar.rotation.x += deltaY * 0.01;
+
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            }
+        });
+    }
+
+    function createAvatar() {
+        avatar = new THREE.Group();
+
+        // Get measurements from page
+        const height = parseFloat('{{ body_scan.height }}') || 170;
+        const chest = parseFloat('{{ body_scan.chest }}') || 90;
+        const waist = parseFloat('{{ body_scan.waist }}') || 75;
+        const shoulder = parseFloat('{{ body_scan.shoulder_width }}') || 45;
+
+        // Normalize measurements (scale to reasonable 3D sizes)
+        const scale = 0.02;
+        const bodyHeight = height * scale;
+        const bodyWidth = chest * scale * 0.5;
+        const waistWidth = waist * scale * 0.5;
+
+        // Head
+        const headGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+        const skinMaterial = new THREE.MeshPhongMaterial({ color: 0xffdbac });
+        const head = new THREE.Mesh(headGeometry, skinMaterial);
+        head.position.y = bodyHeight * 0.45;
+        avatar.add(head);
+
+        // Torso
+        const torsoGeometry = new THREE.CylinderGeometry(waistWidth, bodyWidth, bodyHeight * 0.4, 32);
+        const shirtMaterial = new THREE.MeshPhongMaterial({ color: 0x6366f1 });
+        const torso = new THREE.Mesh(torsoGeometry, shirtMaterial);
+        torso.position.y = bodyHeight * 0.15;
+        avatar.add(torso);
+
+        // Legs
+        const legGeometry = new THREE.CylinderGeometry(0.15, 0.15, bodyHeight * 0.4, 32);
+        const pantsMaterial = new THREE.MeshPhongMaterial({ color: 0x1f2937 });
+
+        const leftLeg = new THREE.Mesh(legGeometry, pantsMaterial);
+        leftLeg.position.set(-0.3, -bodyHeight * 0.2, 0);
+        avatar.add(leftLeg);
+
+        const rightLeg = new THREE.Mesh(legGeometry, pantsMaterial);
+        rightLeg.position.set(0.3, -bodyHeight * 0.2, 0);
+        avatar.add(rightLeg);
+
+        // Arms
+        const armGeometry = new THREE.CylinderGeometry(0.1, 0.1, bodyHeight * 0.35, 32);
+
+        const leftArm = new THREE.Mesh(armGeometry, shirtMaterial);
+        leftArm.position.set(-bodyWidth - 0.2, bodyHeight * 0.15, 0);
+        leftArm.rotation.z = 0.3;
+        avatar.add(leftArm);
+
+        const rightArm = new THREE.Mesh(armGeometry, shirtMaterial);
+        rightArm.position.set(bodyWidth + 0.2, bodyHeight * 0.15, 0);
+        rightArm.rotation.z = -0.3;
+        avatar.add(rightArm);
+
+        scene.add(avatar);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Slow rotation
+        if (avatar) {
+            avatar.rotation.y += 0.005;
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    function onWindowResize() {
+        const container = document.getElementById('avatar-container');
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', init3DAvatar);
+</script>
+{% endblock %}
