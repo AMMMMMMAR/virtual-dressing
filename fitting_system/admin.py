@@ -76,8 +76,8 @@ class InventoryAdmin(admin.ModelAdmin):
 
 @admin.register(BodyScan)
 class BodyScanAdmin(admin.ModelAdmin):
-    list_display = ['session_id', 'height', 'chest', 'waist', 'shoulder_width', 'skin_tone', 'scanned_at']
-    list_filter = ['skin_tone', 'scanned_at']
+    list_display = ['session_id', 'height', 'chest', 'waist', 'shoulder_width', 'skin_tone', 'undertone', 'scanned_at']
+    list_filter = ['skin_tone', 'undertone', 'scanned_at']
     search_fields = ['session_id']
     readonly_fields = ['session_id', 'scanned_at']
     ordering = ['-scanned_at']

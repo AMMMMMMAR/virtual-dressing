@@ -90,12 +90,13 @@ class RecommendationEngine:
         else:
             return 'oversize'
     
-    def recommend_colors(self, skin_tone: str) -> List[str]:
+    def recommend_colors(self, skin_tone: str, undertone: str = 'warm') -> List[str]:
         """
-        Recommend colors based on skin tone
+        Recommend colors based on skin tone and undertone
         
         Args:
-            skin_tone: 'light', 'medium', or 'dark'
+            skin_tone: Skin tone category (e.g., 'very_light', 'light', 'intermediate', 'tan', 'dark')
+            undertone: Skin undertone ('warm' or 'cool')
             
         Returns:
             List of recommended color names
@@ -103,7 +104,7 @@ class RecommendationEngine:
         from fitting_system.ai_modules.skin_tone import SkinToneAnalyzer
         
         analyzer = SkinToneAnalyzer()
-        return analyzer.get_recommended_colors(skin_tone)
+        return analyzer.get_recommended_colors(skin_tone, undertone)
     
     def recommend_products(
         self,
@@ -194,7 +195,9 @@ class RecommendationEngine:
         
         recommended_size = self.recommend_size(measurements)
         recommended_fit = self.recommend_fit(measurements)
-        recommended_colors = self.recommend_colors(body_scan.skin_tone)
+        # Use undertone for color recommendations (with backward compatibility)
+        undertone = getattr(body_scan, 'undertone', 'warm')
+        recommended_colors = self.recommend_colors(body_scan.skin_tone, undertone)
         
         # Get product recommendations
         # Try to infer gender from product availability (for prototype)

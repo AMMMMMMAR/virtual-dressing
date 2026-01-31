@@ -65,15 +65,18 @@ def process_scan(request):
         
         # Analyze skin tone - use dedicated skin image if available, otherwise fall back to front image
         skin_tone_analyzer = SkinToneAnalyzer()
-        skin_tone = skin_tone_analyzer.analyze_skin_tone(skin_image if skin_image is not None else front_image)
+        skin_analysis = skin_tone_analyzer.analyze_skin_tone_detailed(
+            skin_image if skin_image is not None else front_image
+        )
         
-        # Create BodyScan record
+        # Create BodyScan record with skin tone and undertone
         body_scan = BodyScan.objects.create(
             height=measurements['height'],
             shoulder_width=measurements['shoulder_width'],
             chest=measurements['chest'],
             waist=measurements['waist'],
-            skin_tone=skin_tone
+            skin_tone=skin_analysis.skin_tone,
+            undertone=skin_analysis.undertone
         )
         
         # Generate recommendations
@@ -84,7 +87,12 @@ def process_scan(request):
             'success': True,
             'session_id': str(body_scan.session_id),
             'measurements': measurements,
-            'skin_tone': skin_tone
+            'skin_tone': skin_analysis.skin_tone,
+            'skin_tone_display': skin_analysis.skin_tone.replace('_', ' ').title(),
+            'undertone': skin_analysis.undertone,
+            'undertone_display': skin_analysis.undertone.title(),
+            'ita_value': round(skin_analysis.ita_value, 2),
+            'confidence': round(skin_analysis.confidence, 2)
         })
         
     except ValueError as e:
@@ -210,9 +218,10 @@ def recommendations(request, session_id):
     body_scan = get_object_or_404(BodyScan, session_id=session_id)
     recommendations = body_scan.recommendations.all()
     
-    # Get recommended colors
+    # Get recommended colors based on skin tone + undertone
     rec_engine = RecommendationEngine()
-    recommended_colors = rec_engine.recommend_colors(body_scan.skin_tone)
+    undertone = getattr(body_scan, 'undertone', 'warm')  # Default to warm for backward compatibility
+    recommended_colors = rec_engine.recommend_colors(body_scan.skin_tone, undertone)
     
     context = {
         'body_scan': body_scan,
@@ -220,6 +229,8 @@ def recommendations(request, session_id):
         'recommended_colors': recommended_colors[:5],
         'recommended_size': recommendations.first().recommended_size if recommendations.exists() else 'N/A',
         'recommended_fit': recommendations.first().recommended_fit if recommendations.exists() else 'N/A',
+        'skin_tone_display': body_scan.skin_tone.replace('_', ' ').title(),
+        'undertone_display': undertone.title(),
     }
     
     return render(request, 'recommendations.html', context)
