@@ -1,11 +1,11 @@
 """
 Skin Tone Analysis Module
-Uses MediaPipe Face Detection + LAB Color Space for accurate undertone analysis
+Uses MediaPipe Face Detection to analyze skin tone
 """
 
 import cv2
 import numpy as np
-from typing import Tuple, Optional, Dict
+from typing import Tuple, Optional
 
 try:
     # Try new MediaPipe API (v0.10+)
@@ -15,20 +15,32 @@ try:
 except ImportError:
     # Fall back to old API
     import mediapipe as mp
-    USE_NEW_API = False
+    MEDIAPIPE_AVAILABLE = True
+except ImportError:
+    MEDIAPIPE_AVAILABLE = False
+
+
+@dataclass
+class SkinToneResult:
+    """Result of skin tone analysis"""
+    skin_tone: str        # 'very_light', 'light', 'intermediate', 'tan', 'dark'
+    undertone: str        # 'warm' or 'cool'
+    ita_value: float      # ITA angle in degrees
+    L_star: float         # Lightness value (0-100)
+    b_star: float         # Yellow-blue axis value
+    confidence: float     # Confidence score (0-1)
 
 
 class SkinToneAnalyzer:
-    """Analyzes skin tone and undertone from facial images using industry-standard methods"""
+    """Analyzes skin tone from facial images"""
     
-    UNDERTONE_CATEGORIES = {
-        'warm': 'Warm',
-        'cool': 'Cool',
-        'neutral': 'Neutral'
+    SKIN_TONE_CATEGORIES = {
+        'light': 'Light',
+        'medium': 'Medium',
+        'dark': 'Dark'
     }
     
     def __init__(self):
-        """Initialize face detection based on available MediaPipe version"""
         if USE_NEW_API:
             # New API - use fallback method
             self.use_mediapipe = False
@@ -43,18 +55,27 @@ class SkinToneAnalyzer:
     
     def analyze_skin_tone(self, image_data: np.ndarray) -> str:
         """
-        Analyze skin undertone from an image
+        Analyze skin tone from an image
         
         Args:
             image_data: Image as numpy array (BGR format from OpenCV)
             
         Returns:
-            Undertone category: 'warm', 'cool', or 'neutral'
+            Skin tone category: 'light', 'medium', or 'dark'
         """
-        if not self.use_mediapipe:
-            # Fallback: Analyze center region of image
-            return self._analyze_without_mediapipe(image_data)
+        result = self.analyze_skin_tone_detailed(image_data)
+        return result.skin_tone
+    
+    def analyze_skin_tone_detailed(self, image_data: np.ndarray) -> SkinToneResult:
+        """
+        Perform detailed skin tone analysis with ITA and undertone detection.
         
+        Args:
+            image_data: Image as numpy array (BGR format from OpenCV)
+            
+        Returns:
+            SkinToneResult with skin_tone, undertone, ITA value, L*, b*, and confidence
+        """
         # Convert BGR to RGB for MediaPipe
         image_rgb = cv2.cvtColor(image_data, cv2.COLOR_BGR2RGB)
         
@@ -69,31 +90,7 @@ class SkinToneAnalyzer:
         detection = results.detections[0]
         
         # Extract face region
-        face_region = self._extract_face_region(image_rgb, detection)
-        
-        if face_region is None or face_region.size == 0:
-            return self._analyze_without_mediapipe(image_data)
-        
-        # Calculate average skin color
-        avg_color = self._get_average_skin_color(face_region)
-        
-        # Classify undertone using LAB color space
-        undertone = self._classify_undertone(avg_color)
-        
-        return undertone
-    
-    def _extract_face_region(self, image_rgb: np.ndarray, detection) -> Optional[np.ndarray]:
-        """
-        Extract center portion of detected face region
-        
-        Args:
-            image_rgb: RGB image
-            detection: MediaPipe face detection result
-            
-        Returns:
-            Face region as numpy array, or None if invalid
-        """
-        h, w, _ = image_rgb.shape
+        h, w, _ = image_data.shape
         bounding_box = detection.location_data.relative_bounding_box
         
         # Convert relative coordinates to absolute
@@ -108,46 +105,36 @@ class SkinToneAnalyzer:
         x_end = min(w, x + width)
         y_end = min(h, y + height)
         
-        # Validate dimensions
-        if x_end <= x or y_end <= y:
-            return None
-        
-        # Extract center portion of face (avoid hair, background, shadows)
-        # Use middle 50% of face width and height
-        center_margin_x = width // 4
-        center_margin_y = height // 4
-        
-        face_center_x = x + center_margin_x
-        face_center_y = y + center_margin_y
+        # Extract face region (use center portion to avoid hair/background)
+        face_center_x = x + width // 4
+        face_center_y = y + height // 4
         face_center_width = width // 2
         face_center_height = height // 2
-        
-        # Ensure center region is valid
-        if face_center_x + face_center_width > w or face_center_y + face_center_height > h:
-            # Fall back to full face region
-            return image_rgb[y:y_end, x:x_end]
         
         face_region = image_rgb[
             face_center_y:face_center_y + face_center_height,
             face_center_x:face_center_x + face_center_width
         ]
         
-        return face_region
+        if face_region.size == 0:
+            return self._analyze_without_mediapipe(image_data)
+        
+        # Calculate average skin color
+        avg_color = self._get_average_skin_color(face_region)
+        
+        # Classify skin tone
+        skin_tone = self._classify_skin_tone(avg_color)
+        
+        return skin_tone
     
-    def _analyze_without_mediapipe(self, image_data: np.ndarray) -> str:
+    def _extract_skin_fallback(self, image_rgb: np.ndarray) -> Optional[np.ndarray]:
         """
         Fallback method to analyze skin tone without face detection
         Analyzes the center region of the image
-        
-        Args:
-            image_data: BGR image
-            
-        Returns:
-            Undertone category
         """
-        h, w, _ = image_data.shape
+        h, w, _ = image_rgb.shape
         
-        # Extract center region (assume face/body is in center)
+        # Extract center region (assuming face is centered)
         center_y = h // 3
         center_x = w // 3
         region_h = h // 3
@@ -161,215 +148,100 @@ class SkinToneAnalyzer:
         # Calculate average color
         avg_color = self._get_average_skin_color(center_region_rgb)
         
-        # Classify undertone
-        return self._classify_undertone(avg_color)
+        # Classify skin tone
+        return self._classify_skin_tone(avg_color)
     
     def _get_average_skin_color(self, face_region: np.ndarray) -> Tuple[float, float, float]:
         """
         Calculate average skin color from face region
-        Uses simple averaging since we already extracted clean face center
         
         Args:
-            face_region: Face region as RGB numpy array
+            skin_pixels: Array of RGB pixels (N, 3)
             
         Returns:
-            Tuple of (R, G, B) average values
+            Tuple of (L_star, b_star) median values
         """
-        # Since we extracted the center portion of the face,
-        # a simple average is more reliable than complex masking
-        # which might exclude valid skin tones
+        # Convert to YCrCb color space for better skin detection
+        ycrcb = cv2.cvtColor(face_region, cv2.COLOR_RGB2YCrCb)
         
-        avg_color = cv2.mean(face_region)[:3]
+        # Define skin color range in YCrCb
+        # These values are empirically determined for skin detection
+        lower_skin = np.array([0, 133, 77], dtype=np.uint8)
+        upper_skin = np.array([255, 173, 127], dtype=np.uint8)
+        
+        # Create mask for skin pixels
+        skin_mask = cv2.inRange(ycrcb, lower_skin, upper_skin)
+        
+        # Apply mask to get skin pixels only
+        skin_pixels = cv2.bitwise_and(face_region, face_region, mask=skin_mask)
+        
+        # Calculate average color of skin pixels
+        # If no skin pixels detected, use entire face region
+        if np.count_nonzero(skin_mask) > 0:
+            avg_color = cv2.mean(face_region, mask=skin_mask)[:3]
+        else:
+            avg_color = cv2.mean(face_region)[:3]
         
         return avg_color
     
-    def _classify_undertone(self, rgb_color: Tuple[float, float, float]) -> str:
+    def _classify_skin_tone(self, rgb_color: Tuple[float, float, float]) -> str:
         """
-        Classify skin undertone using LAB color space
-        Industry-standard method for accurate undertone detection
-        
-        LAB color space:
-        - L: Lightness (0-255)
-        - A: Green ↔ Red axis
-        - B: Blue ↔ Yellow axis (CRITICAL for undertone)
+        Classify skin tone based on RGB color
         
         Args:
-            rgb_color: Tuple of (R, G, B) values
+            ita_value: ITA angle in degrees
             
         Returns:
-            Undertone category: 'warm', 'cool', or 'neutral'
+            Skin tone category: 'light', 'medium', or 'dark'
         """
-        # Handle edge case
-        if all(c == 0 for c in rgb_color):
-            return 'neutral'
+        r, g, b = rgb_color
         
-        # Convert single RGB pixel to LAB color space
-        # LAB is perceptually uniform and better for color analysis
-        rgb_array = np.uint8([[list(rgb_color)]])
-        lab = cv2.cvtColor(rgb_array, cv2.COLOR_RGB2LAB)[0][0]
+        # Calculate luminance (perceived brightness)
+        # Using standard luminance formula
+        luminance = 0.299 * r + 0.587 * g + 0.114 * b
         
-        L, A, B_channel = lab
-        
-        # LAB B channel interpretation:
-        # - 128 = neutral (no yellow or blue bias)
-        # - > 128 = yellow undertones (WARM)
-        # - < 128 = blue undertones (COOL)
-        
-        # Define threshold for neutral zone
-        # Wider threshold = more people classified as neutral
-        # Narrower threshold = more warm/cool classifications
-        neutral_threshold = 5
-        
-        if B_channel > 128 + neutral_threshold:
-            return 'warm'
-        elif B_channel < 128 - neutral_threshold:
-            return 'cool'
+        # Classify based on luminance thresholds
+        # These thresholds are approximate and can be adjusted
+        if luminance > 170:
+            return 'light'
+        elif luminance > 120:
+            return 'medium'
         else:
-            return 'neutral'
+            return 'dark'
     
-    def get_color_compatibility_score(self, color_tone: str, skin_undertone: str) -> float:
+    def get_recommended_colors(self, skin_tone: str) -> list:
         """
-        Calculate compatibility score between clothing color and skin undertone
+        Get recommended clothing colors based on skin tone
         
         Args:
-            color_tone: Color's undertone ('warm', 'cool', 'neutral')
-            skin_undertone: User's skin undertone ('warm', 'cool', 'neutral')
-            
-        Returns:
-            Compatibility score (0.0 to 1.0)
-        """
-        # Compatibility matrix based on color theory
-        compatibility_matrix = {
-            'warm': {
-                'warm': 1.0,      # Perfect match
-                'neutral': 0.8,   # Good match
-                'cool': 0.5       # Poor match
-            },
-            'cool': {
-                'cool': 1.0,
-                'neutral': 0.8,
-                'warm': 0.5
-            },
-            'neutral': {
-                'warm': 0.85,
-                'cool': 0.85,
-                'neutral': 1.0
-            }
-        }
-        
-        return compatibility_matrix.get(skin_undertone, {}).get(color_tone, 0.5)
-    
-    def is_color_compatible(self, color_tone: str, skin_undertone: str, 
-                          threshold: float = 0.7) -> bool:
-        """
-        Check if a color is compatible with skin undertone
-        
-        Args:
-            color_tone: Color's undertone
-            skin_undertone: User's undertone
-            threshold: Minimum compatibility score (default: 0.7)
-            
-        Returns:
-            True if compatible, False otherwise
-        """
-        score = self.get_color_compatibility_score(color_tone, skin_undertone)
-        return score >= threshold
-    
-    def get_undertone_description(self, undertone: str) -> Dict[str, any]:
-        """
-        Get detailed information about an undertone
-        
-        Args:
-            undertone: Undertone category
+            skin_tone: Skin tone category ('light', 'medium', or 'dark')
             
         Returns:
             Dictionary with undertone details
         """
-        descriptions = {
-            'warm': {
-                'name': 'Warm',
-                'description': 'Yellow, peachy, or golden undertones',
-                'best_colors': ['warm', 'neutral'],
-                'avoid_colors': ['cool'],
-                'characteristics': [
-                    'Veins appear greenish',
-                    'Looks best in gold jewelry',
-                    'Tans easily in the sun'
-                ]
-            },
-            'cool': {
-                'name': 'Cool',
-                'description': 'Pink, red, or bluish undertones',
-                'best_colors': ['cool', 'neutral'],
-                'avoid_colors': ['warm'],
-                'characteristics': [
-                    'Veins appear bluish or purple',
-                    'Looks best in silver jewelry',
-                    'Burns easily in the sun'
-                ]
-            },
-            'neutral': {
-                'name': 'Neutral',
-                'description': 'Balanced mix of warm and cool undertones',
-                'best_colors': ['warm', 'cool', 'neutral'],
-                'avoid_colors': [],
-                'characteristics': [
-                    'Veins appear blue-green',
-                    'Looks good in both gold and silver jewelry',
-                    'Can wear most color palettes'
-                ]
-            }
+        color_recommendations = {
+            'light': [
+                'Pastel Pink', 'Light Blue', 'Lavender', 'Mint Green',
+                'Peach', 'Soft Yellow', 'Baby Blue', 'Coral',
+                'Navy Blue', 'Emerald Green', 'Ruby Red'
+            ],
+            'medium': [
+                'Earth Brown', 'Olive Green', 'Burgundy', 'Mustard Yellow',
+                'Terracotta', 'Teal', 'Warm Orange', 'Camel',
+                'Deep Purple', 'Forest Green', 'Rust'
+            ],
+            'dark': [
+                'Bright White', 'Vibrant Red', 'Electric Blue', 'Hot Pink',
+                'Sunny Yellow', 'Lime Green', 'Orange', 'Magenta',
+                'Turquoise', 'Gold', 'Silver'
+            ]
         }
         
-        return descriptions.get(undertone, descriptions['neutral'])
-    
-    def analyze_with_confidence(self, image_data: np.ndarray) -> Dict[str, any]:
-        """
-        Analyze skin tone with confidence scoring
-        
-        Args:
-            image_data: Image as numpy array (BGR)
-            
-        Returns:
-            Dictionary with undertone and confidence metrics
-        """
-        undertone = self.analyze_skin_tone(image_data)
-        
-        # Get face region for confidence calculation
-        if self.use_mediapipe:
-            image_rgb = cv2.cvtColor(image_data, cv2.COLOR_BGR2RGB)
-            results = self.face_detection.process(image_rgb)
-            
-            if results.detections:
-                detection = results.detections[0]
-                face_region = self._extract_face_region(image_rgb, detection)
-                
-                if face_region is not None and face_region.size > 0:
-                    # Calculate confidence based on color consistency
-                    avg_color = self._get_average_skin_color(face_region)
-                    std_dev = np.std(face_region, axis=(0, 1))
-                    
-                    # Lower std deviation = more consistent color = higher confidence
-                    confidence = max(0.5, 1.0 - (np.mean(std_dev) / 255.0))
-                    
-                    return {
-                        'undertone': undertone,
-                        'confidence': round(confidence, 2),
-                        'face_detected': True,
-                        'description': self.get_undertone_description(undertone)
-                    }
-        
-        # Fallback result
-        return {
-            'undertone': undertone,
-            'confidence': 0.7,  # Default confidence for fallback method
-            'face_detected': False,
-            'description': self.get_undertone_description(undertone)
-        }
+        return color_recommendations.get(skin_tone, color_recommendations['medium'])
     
     def __del__(self):
-        """Cleanup MediaPipe resources"""
-        if hasattr(self, 'face_detection') and self.use_mediapipe:
+        """Cleanup"""
+        if hasattr(self, 'face_detection'):
             self.face_detection.close()
 
 

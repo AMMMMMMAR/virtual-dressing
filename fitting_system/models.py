@@ -126,9 +126,16 @@ class Inventory(models.Model):
 class BodyScan(models.Model):
     """Stored measurement data (no images)"""
     SKIN_TONE_CHOICES = [
+        ('very_light', 'Very Light'),
         ('light', 'Light'),
-        ('medium', 'Medium'),
+        ('intermediate', 'Intermediate'),
+        ('tan', 'Tan'),
         ('dark', 'Dark'),
+    ]
+    
+    UNDERTONE_CHOICES = [
+        ('warm', 'Warm'),
+        ('cool', 'Cool'),
     ]
     
     session_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
@@ -136,7 +143,8 @@ class BodyScan(models.Model):
     shoulder_width = models.DecimalField(max_digits=5, decimal_places=2)  # cm
     chest = models.DecimalField(max_digits=5, decimal_places=2)  # cm
     waist = models.DecimalField(max_digits=5, decimal_places=2)  # cm
-    skin_tone = models.CharField(max_length=10, choices=SKIN_TONE_CHOICES)
+    skin_tone = models.CharField(max_length=15, choices=SKIN_TONE_CHOICES)
+    undertone = models.CharField(max_length=10, choices=UNDERTONE_CHOICES, default='warm')
     scanned_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
