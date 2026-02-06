@@ -11,6 +11,7 @@ class Command(BaseCommand):
         Inventory.objects.all().delete()
         ProductVariant.objects.all().delete()
         Product.objects.all().delete()
+        Color.objects.all().delete()  # Clear colors to add new ones
         
         self.stdout.write('Populating database with MVP data...')
         
@@ -30,74 +31,302 @@ class Command(BaseCommand):
         for size_data in sizes_data:
             Size.objects.get_or_create(name=size_data['name'], defaults=size_data)
         
-        # Ensure Colors exist
-        self.stdout.write('Ensuring colors exist...')
+        # Create realistic Colors for each product type
+        self.stdout.write('Creating realistic product colors...')
         colors_data = [
-            # Neutral colors for MVP
-            {'name': 'Black', 'hex_code': '#000000', 'category': 'neutral'},
-            {'name': 'White', 'hex_code': '#FFFFFF', 'category': 'neutral'},
-            {'name': 'Navy Blue', 'hex_code': '#000080', 'category': 'neutral'},
-            {'name': 'Gray', 'hex_code': '#808080', 'category': 'neutral'},
-            {'name': 'Beige', 'hex_code': '#F5F5DC', 'category': 'neutral'},
+            # Classic Cotton Shirt colors (men's shirt - typically white/blue/gray)
+            {'name': 'Crisp White', 'hex_code': '#FFFFFF', 'category': 'neutral'},
+            {'name': 'Sky Blue', 'hex_code': '#87CEEB', 'category': 'light'},
+            {'name': 'Light Gray', 'hex_code': '#D3D3D3', 'category': 'neutral'},
             
-            # Additional colors
-            {'name': 'Burgundy', 'hex_code': '#800020', 'category': 'medium'},
-            {'name': 'Light Blue', 'hex_code': '#ADD8E6', 'category': 'light'},
-            {'name': 'Pastel Pink', 'hex_code': '#FFD1DC', 'category': 'light'},
+            # Casual Denim Jeans colors (blue jeans variations)
+            {'name': 'Classic Blue Denim', 'hex_code': '#1560BD', 'category': 'medium'},
+            {'name': 'Light Wash Blue', 'hex_code': '#6B8FAF', 'category': 'light'},
+            {'name': 'Dark Indigo', 'hex_code': '#2B1B72', 'category': 'dark'},
+            
+            # Leather Jacket colors (brown/black leather tones)
+            {'name': 'Classic Black Leather', 'hex_code': '#1C1C1C', 'category': 'dark'},
+            {'name': 'Vintage Brown', 'hex_code': '#654321', 'category': 'medium'},
+            {'name': 'Cognac Tan', 'hex_code': '#9A463D', 'category': 'medium'},
+            
+            # Elegant Blouse colors (women's blouse - soft/elegant tones)
+            {'name': 'Ivory Cream', 'hex_code': '#FFFFF0', 'category': 'light'},
+            {'name': 'Blush Pink', 'hex_code': '#FFB6C1', 'category': 'light'},
+            {'name': 'Soft Lavender', 'hex_code': '#E6E6FA', 'category': 'light'},
+            
+            # Summer Dress colors (floral/vibrant tones)
+            {'name': 'Coral Rose', 'hex_code': '#FF7F7F', 'category': 'warm'},
+            {'name': 'Sunny Yellow', 'hex_code': '#FFD700', 'category': 'warm'},
+            {'name': 'Ocean Teal', 'hex_code': '#20B2AA', 'category': 'cool'},
+            
+            # High-Waist Trousers colors (women's pants - office/casual)
+            {'name': 'Charcoal Gray', 'hex_code': '#36454F', 'category': 'neutral'},
+            {'name': 'Camel Beige', 'hex_code': '#C19A6B', 'category': 'neutral'},
+            {'name': 'Navy Classic', 'hex_code': '#000080', 'category': 'dark'},
         ]
         
+        colors = {}
         for color_data in colors_data:
-            Color.objects.get_or_create(name=color_data['name'], defaults=color_data)
+            color, _ = Color.objects.get_or_create(name=color_data['name'], defaults=color_data)
+            colors[color.name] = color
         
-        # Create MVP Products - Only 6 essential items
-        self.stdout.write('Creating MVP products...')
-        products_data = [
-            # Men's Set (3 items)
-            {'name': 'Classic Cotton Shirt', 'category': 'shirt', 'fit_type': 'regular', 'gender': 'men', 
-             'price': 49.99, 'description': 'A timeless classic cotton shirt perfect for any occasion. Made from 100% premium cotton for maximum comfort and breathability.'},
+        # Create MVP Products with specific color assignments
+        self.stdout.write('Creating MVP products with realistic colors...')
+        
+        # Define products with their specific colors
+        # Each base product has 3 fit variants: slim, regular, oversize
+        products_config = [
+            # ==========================================
+            # MEN'S SHIRTS (3 fit variants)
+            # ==========================================
+            {
+                'product': {
+                    'name': 'Slim Fit Cotton Shirt', 
+                    'category': 'shirt', 
+                    'fit_type': 'slim', 
+                    'gender': 'men', 
+                    'price': 54.99, 
+                    'description': 'Modern slim fit cotton shirt for a sleek, tailored look. Perfect for those who prefer a fitted silhouette.'
+                },
+                'colors': ['Crisp White', 'Sky Blue', 'Light Gray']
+            },
+            {
+                'product': {
+                    'name': 'Classic Cotton Shirt', 
+                    'category': 'shirt', 
+                    'fit_type': 'regular', 
+                    'gender': 'men', 
+                    'price': 49.99, 
+                    'description': 'A timeless classic cotton shirt perfect for any occasion. Made from 100% premium cotton for maximum comfort and breathability.'
+                },
+                'colors': ['Crisp White', 'Sky Blue', 'Light Gray']
+            },
+            {
+                'product': {
+                    'name': 'Relaxed Cotton Shirt', 
+                    'category': 'shirt', 
+                    'fit_type': 'oversize', 
+                    'gender': 'men', 
+                    'price': 52.99, 
+                    'description': 'Comfortable relaxed fit cotton shirt with extra room for ease of movement. Perfect for a laid-back style.'
+                },
+                'colors': ['Crisp White', 'Sky Blue', 'Light Gray']
+            },
             
-            {'name': 'Casual Denim Jeans', 'category': 'pants', 'fit_type': 'regular', 'gender': 'men', 
-             'price': 79.99, 'description': 'Comfortable denim jeans with a classic fit. Durable and stylish for everyday wear with premium denim fabric.'},
+            # ==========================================
+            # MEN'S JEANS (3 fit variants)
+            # ==========================================
+            {
+                'product': {
+                    'name': 'Slim Fit Jeans', 
+                    'category': 'pants', 
+                    'fit_type': 'slim', 
+                    'gender': 'men', 
+                    'price': 84.99, 
+                    'description': 'Modern slim fit denim jeans with a streamlined silhouette. Stretch fabric for comfort and mobility.'
+                },
+                'colors': ['Classic Blue Denim', 'Light Wash Blue', 'Dark Indigo']
+            },
+            {
+                'product': {
+                    'name': 'Casual Denim Jeans', 
+                    'category': 'pants', 
+                    'fit_type': 'regular', 
+                    'gender': 'men', 
+                    'price': 79.99, 
+                    'description': 'Comfortable denim jeans with a classic fit. Durable and stylish for everyday wear with premium denim fabric.'
+                },
+                'colors': ['Classic Blue Denim', 'Light Wash Blue', 'Dark Indigo']
+            },
+            {
+                'product': {
+                    'name': 'Loose Fit Jeans', 
+                    'category': 'pants', 
+                    'fit_type': 'oversize', 
+                    'gender': 'men', 
+                    'price': 82.99, 
+                    'description': 'Relaxed loose fit jeans for maximum comfort. A contemporary streetwear-inspired silhouette.'
+                },
+                'colors': ['Classic Blue Denim', 'Light Wash Blue', 'Dark Indigo']
+            },
             
-            {'name': 'Leather Jacket', 'category': 'jacket', 'fit_type': 'regular', 'gender': 'men', 
-             'price': 199.99, 'description': 'Premium leather jacket with a classic design. Timeless piece that never goes out of style, crafted from genuine leather.'},
+            # ==========================================
+            # MEN'S JACKETS (3 fit variants)
+            # ==========================================
+            {
+                'product': {
+                    'name': 'Fitted Leather Jacket', 
+                    'category': 'jacket', 
+                    'fit_type': 'slim', 
+                    'gender': 'men', 
+                    'price': 219.99, 
+                    'description': 'Sleek fitted leather jacket with a modern cut. Premium leather for a sharp, tailored appearance.'
+                },
+                'colors': ['Classic Black Leather', 'Vintage Brown', 'Cognac Tan']
+            },
+            {
+                'product': {
+                    'name': 'Leather Jacket', 
+                    'category': 'jacket', 
+                    'fit_type': 'regular', 
+                    'gender': 'men', 
+                    'price': 199.99, 
+                    'description': 'Premium leather jacket with a classic design. Timeless piece that never goes out of style, crafted from genuine leather.'
+                },
+                'colors': ['Classic Black Leather', 'Vintage Brown', 'Cognac Tan']
+            },
+            {
+                'product': {
+                    'name': 'Oversized Leather Jacket', 
+                    'category': 'jacket', 
+                    'fit_type': 'oversize', 
+                    'gender': 'men', 
+                    'price': 229.99, 
+                    'description': 'Bold oversized leather jacket for a modern streetwear look. Extra room for layering.'
+                },
+                'colors': ['Classic Black Leather', 'Vintage Brown', 'Cognac Tan']
+            },
             
-            # Women's Set (3 items)
-            {'name': 'Elegant Blouse', 'category': 'shirt', 'fit_type': 'regular', 'gender': 'women', 
-             'price': 54.99, 'description': 'Sophisticated blouse with delicate details. Perfect for both office and evening wear with premium silk-like fabric.'},
+            # ==========================================
+            # WOMEN'S BLOUSES (3 fit variants)
+            # ==========================================
+            {
+                'product': {
+                    'name': 'Fitted Blouse', 
+                    'category': 'shirt', 
+                    'fit_type': 'slim', 
+                    'gender': 'women', 
+                    'price': 59.99, 
+                    'description': 'Elegant fitted blouse with a tailored silhouette. Perfect for a polished, professional look.'
+                },
+                'colors': ['Ivory Cream', 'Blush Pink', 'Soft Lavender']
+            },
+            {
+                'product': {
+                    'name': 'Elegant Blouse', 
+                    'category': 'shirt', 
+                    'fit_type': 'regular', 
+                    'gender': 'women', 
+                    'price': 54.99, 
+                    'description': 'Sophisticated blouse with delicate details. Perfect for both office and evening wear with premium silk-like fabric.'
+                },
+                'colors': ['Ivory Cream', 'Blush Pink', 'Soft Lavender']
+            },
+            {
+                'product': {
+                    'name': 'Oversized Blouse', 
+                    'category': 'shirt', 
+                    'fit_type': 'oversize', 
+                    'gender': 'women', 
+                    'price': 56.99, 
+                    'description': 'Flowy oversized blouse for effortless chic style. Comfortable and trendy with relaxed draping.'
+                },
+                'colors': ['Ivory Cream', 'Blush Pink', 'Soft Lavender']
+            },
             
-            {'name': 'Summer Dress', 'category': 'dress', 'fit_type': 'regular', 'gender': 'women', 
-             'price': 89.99, 'description': 'Light and breezy summer dress perfect for warm weather. Comfortable and stylish with a flattering silhouette.'},
+            # ==========================================
+            # WOMEN'S DRESSES (3 fit variants)
+            # ==========================================
+            {
+                'product': {
+                    'name': 'Fitted Summer Dress', 
+                    'category': 'dress', 
+                    'fit_type': 'slim', 
+                    'gender': 'women', 
+                    'price': 94.99, 
+                    'description': 'Form-fitting summer dress that accentuates your silhouette. Elegant and flattering for any occasion.'
+                },
+                'colors': ['Coral Rose', 'Sunny Yellow', 'Ocean Teal']
+            },
+            {
+                'product': {
+                    'name': 'Summer Dress', 
+                    'category': 'dress', 
+                    'fit_type': 'regular', 
+                    'gender': 'women', 
+                    'price': 89.99, 
+                    'description': 'Light and breezy summer dress perfect for warm weather. Comfortable and stylish with a flattering silhouette.'
+                },
+                'colors': ['Coral Rose', 'Sunny Yellow', 'Ocean Teal']
+            },
+            {
+                'product': {
+                    'name': 'Flowy Summer Dress', 
+                    'category': 'dress', 
+                    'fit_type': 'oversize', 
+                    'gender': 'women', 
+                    'price': 92.99, 
+                    'description': 'Airy flowy dress with a relaxed fit. Bohemian-inspired style perfect for casual summer days.'
+                },
+                'colors': ['Coral Rose', 'Sunny Yellow', 'Ocean Teal']
+            },
             
-            {'name': 'High-Waist Trousers', 'category': 'pants', 'fit_type': 'regular', 'gender': 'women', 
-             'price': 74.99, 'description': 'Flattering high-waist trousers with a comfortable fit. Versatile for any occasion from office to casual outings.'},
+            # ==========================================
+            # WOMEN'S TROUSERS (3 fit variants)
+            # ==========================================
+            {
+                'product': {
+                    'name': 'Slim Trousers', 
+                    'category': 'pants', 
+                    'fit_type': 'slim', 
+                    'gender': 'women', 
+                    'price': 79.99, 
+                    'description': 'Tailored slim fit trousers for a sleek, professional look. Stretch fabric for all-day comfort.'
+                },
+                'colors': ['Charcoal Gray', 'Camel Beige', 'Navy Classic']
+            },
+            {
+                'product': {
+                    'name': 'High-Waist Trousers', 
+                    'category': 'pants', 
+                    'fit_type': 'regular', 
+                    'gender': 'women', 
+                    'price': 74.99, 
+                    'description': 'Flattering high-waist trousers with a comfortable fit. Versatile for any occasion from office to casual outings.'
+                },
+                'colors': ['Charcoal Gray', 'Camel Beige', 'Navy Classic']
+            },
+            {
+                'product': {
+                    'name': 'Wide-Leg Trousers', 
+                    'category': 'pants', 
+                    'fit_type': 'oversize', 
+                    'gender': 'women', 
+                    'price': 77.99, 
+                    'description': 'Trendy wide-leg trousers with a relaxed, flowing silhouette. Comfortable and fashion-forward.'
+                },
+                'colors': ['Charcoal Gray', 'Camel Beige', 'Navy Classic']
+            },
         ]
+
         
-        products = []
-        for product_data in products_data:
+        sizes = Size.objects.all()
+        
+        for config in products_config:
+            product_data = config['product']
+            product_colors = config['colors']
+            
             product, created = Product.objects.get_or_create(
                 name=product_data['name'],
                 defaults=product_data
             )
-            products.append(product)
+            
             if created:
                 self.stdout.write(f'  Created: {product.name}')
-        
-        # Create Product Variants and Inventory
-        self.stdout.write('Creating product variants and inventory...')
-        sizes = Size.objects.all()
-        colors = Color.objects.all()[:5]  # Use first 5 colors
-        
-        for product in products:
-            # Create variants for each product
+            
+            # Create variants with specific colors for this product
             product_sizes = list(sizes)[:3]  # S, M, L
-            product_colors = list(colors)[:3]  # First 3 colors
             
             counter = 1
             for size in product_sizes:
-                for color in product_colors:
+                for color_name in product_colors:
+                    color = colors.get(color_name)
+                    if not color:
+                        self.stdout.write(self.style.WARNING(f'    Color not found: {color_name}'))
+                        continue
+                    
                     sku = f"{product.id}-{size.name}-{color.id}-{counter}"
-                    variant, created = ProductVariant.objects.get_or_create(
+                    variant, variant_created = ProductVariant.objects.get_or_create(
                         product=product,
                         size=size,
                         color=color,
@@ -105,42 +334,36 @@ class Command(BaseCommand):
                     )
                     counter += 1
                     
-                    # Create inventory for this variant with varied stock levels
-                    if created:
-                        # Track variant count for distribution
-                        variant_count = Inventory.objects.count()
-                        
-                        # Distribute stock: first 10 out of stock, next 10 low stock, rest in stock
-                        if variant_count < 10:
-                            # Out of stock (0 quantity)
-                            quantity = 0
-                        elif variant_count < 20:
-                            # Low stock (1-4 quantity, threshold is 5)
-                            import random
-                            quantity = random.randint(1, 4)
-                        else:
-                            # In stock (10-25 quantity)
-                            import random
-                            quantity = random.randint(10, 25)
+                    # Create inventory with good stock levels
+                    if variant_created:
+                        import random
+                        quantity = random.randint(10, 25)
                         
                         Inventory.objects.create(
                             product_variant=variant,
                             quantity=quantity,
                             low_stock_threshold=5
                         )
+            
+            self.stdout.write(f'    Colors: {", ".join(product_colors)}')
         
         self.stdout.write(self.style.SUCCESS('\n✅ Successfully populated MVP database!'))
-        self.stdout.write(f'📦 Created {Product.objects.count()} products (3 men\'s + 3 women\'s)')
+        self.stdout.write(f'📦 Created {Product.objects.count()} products (9 men\'s + 9 women\'s with 3 fit types each)')
         self.stdout.write(f'📏 Using {Size.objects.count()} sizes')
         self.stdout.write(f'🎨 Using {Color.objects.count()} colors')
         self.stdout.write(f'🏷️  Created {ProductVariant.objects.count()} product variants')
         self.stdout.write(f'📊 Created {Inventory.objects.count()} inventory records')
         
-        # Display product summary
+        # Display product summary with colors and fit type
         self.stdout.write('\n📋 MVP Product Summary:')
         self.stdout.write('  Men\'s Set:')
-        for product in Product.objects.filter(gender='men'):
-            self.stdout.write(f'    • {product.name} ({product.category})')
+        for product in Product.objects.filter(gender='men').order_by('category', 'fit_type'):
+            colors_list = product.variants.values_list('color__name', flat=True).distinct()
+            self.stdout.write(f'    • {product.name} ({product.category} - {product.fit_type})')
+            self.stdout.write(f'      Colors: {", ".join(colors_list)}')
         self.stdout.write('  Women\'s Set:')
-        for product in Product.objects.filter(gender='women'):
-            self.stdout.write(f'    • {product.name} ({product.category})')
+        for product in Product.objects.filter(gender='women').order_by('category', 'fit_type'):
+            colors_list = product.variants.values_list('color__name', flat=True).distinct()
+            self.stdout.write(f'    • {product.name} ({product.category} - {product.fit_type})')
+            self.stdout.write(f'      Colors: {", ".join(colors_list)}')
+

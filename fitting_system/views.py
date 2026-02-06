@@ -253,24 +253,45 @@ def analyze_face_for_skin_tone(image):
 def recommendations(request, session_id):
     """Display results and recommendations"""
     body_scan = get_object_or_404(BodyScan, session_id=session_id)
-    recommendations = body_scan.recommendations.all()
+    recommendations_list = body_scan.recommendations.all()
+    
+    # Get gender filter from query parameter
+    gender = request.GET.get('gender', None)
+    if gender and gender not in ['men', 'women']:
+        gender = None
     
     # Get recommended colors based on skin tone + undertone
     rec_engine = RecommendationEngine()
     undertone = getattr(body_scan, 'undertone', 'warm')  # Default to warm for backward compatibility
     recommended_colors = rec_engine.recommend_colors(body_scan.skin_tone, undertone)
     
+    # Get actual matching products with size + color from store (with optional gender filter)
+    matching_products = rec_engine.get_matching_product_variants(body_scan, gender=gender, limit=12)
+    
+    # Calculate recommended size and fit directly from measurements
+    measurements = {
+        'height': float(body_scan.height),
+        'chest': float(body_scan.chest),
+        'waist': float(body_scan.waist),
+        'shoulder_width': float(body_scan.shoulder_width)
+    }
+    recommended_size = rec_engine.recommend_size(measurements)
+    recommended_fit = rec_engine.recommend_fit(measurements)
+    
     context = {
         'body_scan': body_scan,
-        'recommendations': recommendations,
+        'recommendations': recommendations_list,
+        'matching_products': matching_products,  # Actual products with size+color
         'recommended_colors': recommended_colors[:5],
-        'recommended_size': recommendations.first().recommended_size if recommendations.exists() else 'N/A',
-        'recommended_fit': recommendations.first().recommended_fit if recommendations.exists() else 'N/A',
+        'recommended_size': recommended_size,  # Calculated directly
+        'recommended_fit': recommended_fit,    # Calculated directly
         'skin_tone_display': body_scan.skin_tone.replace('_', ' ').title(),
         'undertone_display': undertone.title(),
+        'selected_gender': gender,  # Pass current gender filter to template
     }
     
     return render(request, 'recommendations.html', context)
+
 
 
 def inventory_dashboard(request):

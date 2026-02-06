@@ -11,10 +11,14 @@ class RecommendationEngine:
     """Generates clothing recommendations based on body measurements and skin tone"""
     
     FIT_RECOMMENDATIONS = {
-        'slim': {'min_ratio': 1.3, 'max_ratio': 2.0},
-        'regular': {'min_ratio': 1.1, 'max_ratio': 1.3},
-        'oversize': {'min_ratio': 0.0, 'max_ratio': 1.1}
+        'slim': {'min_ratio': 1.4, 'max_ratio': 2.5},
+        'regular': {'min_ratio': 1.15, 'max_ratio': 1.4},
+        'oversize': {'min_ratio': 0.0, 'max_ratio': 1.15}
     }
+    
+    # Conversion factor for width measurements to circumference estimates
+    # Body scan captures width (front-to-back), multiply by ~2 to estimate circumference
+    WIDTH_TO_CIRCUMFERENCE_FACTOR = 2.0
     
     # Garment-specific measurement priorities
     GARMENT_MEASUREMENTS = {
@@ -73,10 +77,12 @@ class RecommendationEngine:
         """
         from fitting_system.models import Size
         
-        chest = measurements.get('chest', 0)
-        waist = measurements.get('waist', 0)
-        height = measurements.get('height', 0)
-        shoulder = measurements.get('shoulder_width', 0)
+        # Convert width measurements to circumference estimates
+        # Body scan captures width, but Size model uses circumference
+        chest = measurements.get('chest', 0) * self.WIDTH_TO_CIRCUMFERENCE_FACTOR
+        waist = measurements.get('waist', 0) * self.WIDTH_TO_CIRCUMFERENCE_FACTOR
+        height = measurements.get('height', 0)  # Height doesn't need conversion
+        shoulder = measurements.get('shoulder_width', 0) * self.WIDTH_TO_CIRCUMFERENCE_FACTOR
         
         # Find matching size based on measurements
         # Priority: chest > waist > shoulder > height
@@ -93,6 +99,9 @@ class RecommendationEngine:
         # If no exact match, find closest size based on chest measurement
         all_sizes = Size.objects.all().order_by('chest_min')
         
+        if not all_sizes.exists():
+            return 'M'  # Fallback if no sizes in database
+        
         if chest < all_sizes.first().chest_min:
             return all_sizes.first().name  # Smallest size
         elif chest > all_sizes.last().chest_max:
@@ -105,6 +114,7 @@ class RecommendationEngine:
         
         # Default fallback
         return 'M'
+
     
     def recommend_size_for_garment(
         self, 
@@ -128,7 +138,9 @@ class RecommendationEngine:
         # Get garment configuration
         config = self.GARMENT_MEASUREMENTS.get(garment_type, self.GARMENT_MEASUREMENTS['shirt'])
         fit_focus = config['fit_focus']
-        focus_value = measurements.get(fit_focus, 0)
+        
+        # Convert width measurement to circumference estimate
+        focus_value = measurements.get(fit_focus, 0) * self.WIDTH_TO_CIRCUMFERENCE_FACTOR
         
         # Find base size using the focus measurement
         if fit_focus == 'chest':
@@ -157,6 +169,7 @@ class RecommendationEngine:
         adjusted_size = self.apply_body_shape_adjustment(base_size, body_shape, garment_type)
         
         return adjusted_size
+
     
     def apply_body_shape_adjustment(self, base_size: str, body_shape: str, garment_type: str) -> str:
         """
@@ -258,19 +271,18 @@ class RecommendationEngine:
         # Get recommended color objects
         recommended_colors = Color.objects.filter(name__in=recommended_color_names)
         
-        # Filter products by gender and fit
+        # Filter products by gender only (not strict fit filtering)
+        # This ensures we always have products to recommend
         products = Product.objects.filter(
-            Q(gender=gender) | Q(gender='unisex'),
-            fit_type=recommended_fit
+            Q(gender=gender) | Q(gender='unisex')
         )
         
         recommendations = []
         
         for product in products:
-            # Check if product has available variants with recommended size and colors
+            # Check if product has any available variants
             available_variants = ProductVariant.objects.filter(
                 product=product,
-                size__name=recommended_size,
                 inventory__quantity__gt=0  # Only available items
             )
             
@@ -279,6 +291,15 @@ class RecommendationEngine:
             
             # Calculate priority score
             priority = 0
+            
+            # Higher priority for matching fit type
+            if product.fit_type == recommended_fit:
+                priority += 15
+            
+            # Higher priority for products with recommended size in stock
+            size_variants = available_variants.filter(size__name=recommended_size)
+            if size_variants.exists():
+                priority += 10
             
             # Higher priority for products with recommended colors
             matching_color_variants = available_variants.filter(
@@ -296,6 +317,130 @@ class RecommendationEngine:
         recommendations.sort(key=lambda x: x[1], reverse=True)
         
         return recommendations[:limit]
+    
+    def get_matching_product_variants(
+        self,
+        body_scan,
+        gender: str = None,
+        limit: int = 6
+    ) -> List[Dict]:
+        """
+        Get actual products from store with specific size and color recommendations.
+        
+        This method finds products that:
+        1. Have the user's recommended size in stock
+        2. Preferably have a color that matches their skin tone
+        3. Match the user's preferred gender (if specified)
+        4. Prioritize products matching recommended fit type
+        
+        Args:
+            body_scan: BodyScan model instance
+            gender: Optional gender filter ('men', 'women', or None for all)
+            limit: Maximum number of products to return
+            
+        Returns:
+            List of dicts with product, size, color, and fit message
+        """
+        from fitting_system.models import Product, ProductVariant, Color, Size
+        
+        # Build measurements dict
+        measurements = {
+            'height': float(body_scan.height),
+            'chest': float(body_scan.chest),
+            'waist': float(body_scan.waist),
+            'shoulder_width': float(body_scan.shoulder_width)
+        }
+        if body_scan.hip:
+            measurements['hip'] = float(body_scan.hip)
+        if body_scan.inseam:
+            measurements['inseam'] = float(body_scan.inseam)
+        if body_scan.torso_length:
+            measurements['torso_length'] = float(body_scan.torso_length)
+        if body_scan.arm_length:
+            measurements['arm_length'] = float(body_scan.arm_length)
+        
+        body_shape = getattr(body_scan, 'body_shape', 'rectangle') or 'rectangle'
+        undertone = getattr(body_scan, 'undertone', 'warm')
+        
+        # Get recommended colors for user's skin tone
+        recommended_color_names = self.recommend_colors(body_scan.skin_tone, undertone)
+        recommended_fit = self.recommend_fit(measurements)
+        
+        # Find matching products
+        matching_products = []
+        
+        # Query products with optional gender filter
+        if gender and gender in ['men', 'women']:
+            products = Product.objects.filter(
+                Q(gender=gender) | Q(gender='unisex')
+            )
+        else:
+            products = Product.objects.all()
+        
+        for product in products:
+            # Get garment-specific size for this product
+            rec_size = self.recommend_size_for_garment(
+                measurements, 
+                product.category, 
+                body_shape
+            )
+            
+            # Check if product fit matches recommended fit
+            fit_matches = product.fit_type == recommended_fit
+            
+            # Priority 1: Exact size + recommended color + in stock
+            matching_variant = ProductVariant.objects.filter(
+                product=product,
+                size__name=rec_size,
+                color__name__in=recommended_color_names,
+                inventory__quantity__gt=0
+            ).select_related('size', 'color', 'product').first()
+            
+            if matching_variant:
+                matching_products.append({
+                    'product': product,
+                    'variant': matching_variant,
+                    'recommended_size': rec_size,
+                    'recommended_color': matching_variant.color.name,
+                    'color_hex': matching_variant.color.hex_code,
+                    'fit_type': product.fit_type,
+                    'is_perfect_match': True,
+                    'fit_matches_recommendation': fit_matches,
+                    'recommended_fit': recommended_fit,
+                    'fit_message': f"This {product.category} in size {rec_size} with {matching_variant.color.name} will fit you perfectly!"
+                })
+                continue
+            
+            # Priority 2: Exact size + any color in stock
+            size_only_variant = ProductVariant.objects.filter(
+                product=product,
+                size__name=rec_size,
+                inventory__quantity__gt=0
+            ).select_related('size', 'color', 'product').first()
+            
+            if size_only_variant:
+                matching_products.append({
+                    'product': product,
+                    'variant': size_only_variant,
+                    'recommended_size': rec_size,
+                    'recommended_color': size_only_variant.color.name,
+                    'color_hex': size_only_variant.color.hex_code,
+                    'fit_type': product.fit_type,
+                    'is_perfect_match': False,
+                    'fit_matches_recommendation': fit_matches,
+                    'recommended_fit': recommended_fit,
+                    'fit_message': f"This {product.category} in size {rec_size} will fit you great!"
+                })
+        
+        # Sort: products matching recommended fit first, then perfect matches, then by name
+        matching_products.sort(key=lambda x: (
+            not x['fit_matches_recommendation'],
+            not x['is_perfect_match'], 
+            x['product'].name
+        ))
+        
+        return matching_products[:limit]
+
     
     def generate_recommendations_for_scan(self, body_scan) -> List[object]:
         """
