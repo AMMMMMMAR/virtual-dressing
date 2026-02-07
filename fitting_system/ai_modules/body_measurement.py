@@ -47,7 +47,7 @@ class BodyMeasurementEstimator:
                 base_options = python.BaseOptions(model_asset_path=self.MODEL_PATH)
                 options = vision.PoseLandmarkerOptions(
                     base_options=base_options,
-                    output_segmentation_masks=False,
+                    output_segmentation_masks=True,  # Enable segmentation for silhouette analysis
                     num_poses=1  # Detect only one person
                 )
                 self.pose_landmarker = vision.PoseLandmarker.create_from_options(options)
@@ -58,7 +58,7 @@ class BodyMeasurementEstimator:
                 print("Using fallback measurement method")
         
         # Calibration factors (pixels to cm)
-        self.PIXEL_TO_CM_RATIO = 0.3  # Approximate, assumes person is ~170cm tall
+        self.PIXEL_TO_CM_RATIO = 0.3  # why ??  Approximate, assumes person is ~170cm tall
     
     # Fashion segment landmark indices (MediaPipe Pose uses 33 landmarks)
     # Reference: https://developers.google.com/mediapipe/solutions/vision/pose_landmarker
@@ -197,6 +197,13 @@ class BodyMeasurementEstimator:
             
             # Get landmarks from first detected pose
             landmarks = detection_result.pose_landmarks[0]
+            
+            # Get segmentation mask if available (for silhouette analysis)
+            segmentation_mask = None
+            if detection_result.segmentation_masks and len(detection_result.segmentation_masks) > 0:
+                # Convert MP Image to numpy array
+                segmentation_mask = detection_result.segmentation_masks[0].numpy_view()
+                
             h, w, _ = image_data.shape
             
             # Calculate measurements
@@ -225,19 +232,20 @@ class BodyMeasurementEstimator:
             )
             
             # Chest circumference (upper body)
-            chest_pixels = self._calculate_chest_new_api(landmarks, h, w)
+            # Pass mask for silhouette analysis
+            chest_pixels = self._calculate_chest_new_api(landmarks, h, w, segmentation_mask=segmentation_mask)
             measurements['chest'] = self.normalize_measurement(
                 chest_pixels * self.PIXEL_TO_CM_RATIO * upper_scale
             )
             
             # Waist circumference (torso)
-            waist_pixels = self._calculate_waist_new_api(landmarks, h, w)
+            waist_pixels = self._calculate_waist_new_api(landmarks, h, w, segmentation_mask=segmentation_mask)
             measurements['waist'] = self.normalize_measurement(
                 waist_pixels * self.PIXEL_TO_CM_RATIO
             )
             
             # Hip circumference (lower body)
-            hip_pixels = self._calculate_hip_new_api(landmarks, h, w)
+            hip_pixels = self._calculate_hip_new_api(landmarks, h, w, segmentation_mask=segmentation_mask)
             measurements['hip'] = self.normalize_measurement(
                 hip_pixels * self.PIXEL_TO_CM_RATIO * lower_scale
             )
@@ -279,7 +287,9 @@ class BodyMeasurementEstimator:
         
         # Estimate measurements based on statistical body proportions
         # These are population averages and will be less accurate than pose detection
-        measurements = {
+        
+        # why ??
+        measurements = {  
             'height': self.normalize_measurement(height),
             'shoulder_width': self.normalize_measurement(height * 0.25),      # ~25% of height
             'chest': self.normalize_measurement(height * 0.55),               # ~55% of height
@@ -420,10 +430,10 @@ class BodyMeasurementEstimator:
         width = np.sqrt((right_x - left_x)**2 + (right_y - left_y)**2)
         return width
     
-    def _calculate_chest_new_api(self, landmarks: List, h: int, w: int, side_depth: float = None) -> float:
+    def _calculate_chest_new_api(self, landmarks: List, h: int, w: int, side_depth: float = None, segmentation_mask: np.ndarray = None) -> float:
         """
         Estimate chest circumference using ellipse formula when side image available,
-        otherwise use improved multipliers.
+        otherwise use silhouette width or improved multipliers.
         """
         shoulder_width = self._calculate_shoulder_width_new_api(landmarks, h, w)
         
@@ -435,15 +445,34 @@ class BodyMeasurementEstimator:
                 'chest'
             )
             return chest_circumference / self.PIXEL_TO_CM_RATIO  # Return in pixels
-        else:
-            # Use average multiplier (will be converted to cm later)
-            multiplier = self.CIRCUMFERENCE_MULTIPLIERS['chest']['average']
-            return shoulder_width * multiplier
+            
+        elif segmentation_mask is not None:
+            # Use silhouette analysis
+            # Chest level: roughly at armpits (midpoint between shoulder and elbow is too low, use shoulder - small offset)
+            # Better: 85% of the way from nose to shoulder? Or shoulder + small down offset.
+            # Shoulders are 11,12. 
+            y_level = (landmarks[11].y + landmarks[12].y) / 2 + 0.05 # Slightly below shoulders
+            silhouette_width = self._extract_silhouette_width(segmentation_mask, y_level)
+            
+            if silhouette_width > 0:
+                # If we have actual width, assume it's the major axis (2a)
+                # Assume depth ratio (width/depth) is approx 1.5 for average chest
+                estimated_depth = silhouette_width / 1.5
+                
+                # Use ellipse formula with estimated depth
+                a = silhouette_width / 2
+                b = estimated_depth / 2
+                perimeter = np.pi * np.sqrt(2 * (a**2 + b**2))
+                return perimeter
+                
+        # Fallback to multiplier
+        multiplier = self.CIRCUMFERENCE_MULTIPLIERS['chest']['average']
+        return shoulder_width * multiplier
     
-    def _calculate_waist_new_api(self, landmarks: List, h: int, w: int, side_depth: float = None) -> float:
+    def _calculate_waist_new_api(self, landmarks: List, h: int, w: int, side_depth: float = None, segmentation_mask: np.ndarray = None) -> float:
         """
         Estimate waist circumference using ellipse formula when side image available,
-        otherwise use improved multipliers.
+        otherwise use silhouette width or improved multipliers.
         """
         LEFT_HIP = 23
         RIGHT_HIP = 24
@@ -465,11 +494,29 @@ class BodyMeasurementEstimator:
                 'waist'
             )
             return waist_circumference / self.PIXEL_TO_CM_RATIO
-        else:
-            multiplier = self.CIRCUMFERENCE_MULTIPLIERS['waist']['average']
-            return hip_width * multiplier
+            
+        elif segmentation_mask is not None:
+            # Waist level: midpoint between lowest rib and hip? 
+            # Approximation: Midpoint between shoulder and hip
+            y_shoulders = (landmarks[11].y + landmarks[12].y) / 2
+            y_hips = (landmarks[23].y + landmarks[24].y) / 2
+            y_level = (y_shoulders + y_hips) / 2 + 0.05 # Bias slightly downwards for natural waist
+            
+            silhouette_width = self._extract_silhouette_width(segmentation_mask, y_level)
+            
+            if silhouette_width > 0:
+                 # Waist is more circular than chest, ratio approx 1.3
+                estimated_depth = silhouette_width / 1.3
+                
+                a = silhouette_width / 2
+                b = estimated_depth / 2
+                perimeter = np.pi * np.sqrt(2 * (a**2 + b**2))
+                return perimeter
+
+        multiplier = self.CIRCUMFERENCE_MULTIPLIERS['waist']['average']
+        return hip_width * multiplier
     
-    def _calculate_hip_new_api(self, landmarks: List, h: int, w: int, side_depth: float = None) -> float:
+    def _calculate_hip_new_api(self, landmarks: List, h: int, w: int, side_depth: float = None, segmentation_mask: np.ndarray = None) -> float:
         """Calculate hip circumference."""
         LEFT_HIP = 23
         RIGHT_HIP = 24
@@ -491,9 +538,24 @@ class BodyMeasurementEstimator:
                 'hip'
             )
             return hip_circumference / self.PIXEL_TO_CM_RATIO
-        else:
-            multiplier = self.CIRCUMFERENCE_MULTIPLIERS['hip']['average']
-            return hip_width * multiplier
+            
+        elif segmentation_mask is not None:
+            # Hip level: at the trochanters (landmarks 23,24)
+            y_level = (left_hip.y + right_hip.y) / 2
+            
+            silhouette_width = self._extract_silhouette_width(segmentation_mask, y_level)
+            
+            if silhouette_width > 0:
+                 # Hips are wider, ratio approx 1.4
+                estimated_depth = silhouette_width / 1.4
+                
+                a = silhouette_width / 2
+                b = estimated_depth / 2
+                perimeter = np.pi * np.sqrt(2 * (a**2 + b**2))
+                return perimeter
+
+        multiplier = self.CIRCUMFERENCE_MULTIPLIERS['hip']['average']
+        return hip_width * multiplier
     
     def _calculate_torso_length_new_api(self, landmarks: List, h: int, w: int) -> float:
         """Calculate torso length from shoulder midpoint to hip midpoint."""
@@ -662,6 +724,40 @@ class BodyMeasurementEstimator:
         
         return stable_measurements
     
+    def _extract_silhouette_width(self, mask: np.ndarray, y_norm: float, threshold: float = 0.5) -> float:
+        """
+        Calculate width of the body silhouette at a specific normalized Y-coordinate.
+        
+        Args:
+            mask: Segmentation mask (normalized float 0-1)
+            y_norm: Normalized Y-coordinate (0-1)
+            threshold: Threshold for binary mask
+            
+        Returns:
+            Width in pixels
+        """
+        h, w = mask.shape
+        y_pixel = int(y_norm * h)
+        
+        # Clamp y to valid image range
+        y_pixel = max(0, min(h - 1, y_pixel))
+        
+        # Get the row
+        row = mask[y_pixel, :]
+        
+        # Count pixels above threshold
+        # Assuming the generated mask has high values for person, low for background
+        binary_row = row > threshold
+        
+        pixel_count = np.sum(binary_row)
+        
+        # Simple quality check: if width is unreasonably small, might be a gap or error
+        # Only return if meaningful
+        if pixel_count < w * 0.05: # Less than 5% of screen width? suspicious.
+            return 0.0
+            
+        return float(pixel_count)
+
     def __del__(self):
         """Cleanup"""
         if hasattr(self, 'pose_landmarker') and self.pose_landmarker:
