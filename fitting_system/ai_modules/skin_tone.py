@@ -6,6 +6,7 @@ Uses MediaPipe Face Detection to analyze skin tone
 import cv2
 import numpy as np
 from typing import Tuple, Optional
+from dataclasses import dataclass
 
 try:
     # Try new MediaPipe API (v0.10+)
@@ -127,6 +128,48 @@ class SkinToneAnalyzer:
         
         return skin_tone
     
+    def _analyze_without_mediapipe(self, image_data: np.ndarray) -> SkinToneResult:
+        """
+        Fallback method to analyze skin tone without face detection
+        Analyzes the center region of the image
+        """
+        # Convert BGR to RGB
+        image_rgb = cv2.cvtColor(image_data, cv2.COLOR_BGR2RGB)
+        h, w, _ = image_rgb.shape
+        
+        # Extract center region (assuming face is centered)
+        center_y = h // 3
+        center_x = w // 3
+        region_h = h // 3
+        region_w = w // 3
+        
+        center_region = image_rgb[center_y:center_y + region_h, center_x:center_x + region_w]
+        
+        # Calculate average color
+        avg_color = self._get_average_skin_color(center_region)
+        
+        # Classify skin tone
+        skin_tone = self._classify_skin_tone(avg_color)
+        
+        # Calculate Lab values for result
+        L_star = 0.299 * avg_color[0] + 0.587 * avg_color[1] + 0.114 * avg_color[2]
+        b_star = avg_color[2] - (avg_color[0] + avg_color[1]) / 2  # Simplified b* approximation
+        
+        # Calculate ITA (Individual Typology Angle) approximation
+        ita_value = np.degrees(np.arctan((L_star - 50) / b_star)) if b_star != 0 else 0
+        
+        # Determine undertone based on color warmth
+        undertone = 'warm' if avg_color[0] > avg_color[2] else 'cool'
+        
+        return SkinToneResult(
+            skin_tone=skin_tone,
+            undertone=undertone,
+            ita_value=ita_value,
+            L_star=L_star,
+            b_star=b_star,
+            confidence=0.6  # Lower confidence for fallback method
+        )
+    
     def _extract_skin_fallback(self, image_rgb: np.ndarray) -> Optional[np.ndarray]:
         """
         Fallback method to analyze skin tone without face detection
@@ -140,7 +183,7 @@ class SkinToneAnalyzer:
         region_h = h // 3
         region_w = w // 3
         
-        center_region = image_data[center_y:center_y + region_h, center_x:center_x + region_w]
+        center_region = image_rgb[center_y:center_y + region_h, center_x:center_x + region_w]
         
         # Convert BGR to RGB
         center_region_rgb = cv2.cvtColor(center_region, cv2.COLOR_BGR2RGB)

@@ -1,215 +1,116 @@
 """
 Recommendation Engine
-Generates intelligent clothing recommendations based on measurements and skin tone
+Generates intelligent clothing recommendations using Gemini AI
+and database-backed product matching.
+
+Architecture:
+    - Gemini AI: Intelligent size/fit/color recommendations
+    - Database: Product matching, inventory checking, variant selection
 """
 
+import logging
 from typing import Dict, List, Tuple
 from django.db.models import Q
 
+logger = logging.getLogger(__name__)
+
 
 class RecommendationEngine:
-    """Generates clothing recommendations based on body measurements and skin tone"""
+    """
+    Generates clothing recommendations using Gemini AI for intelligence
+    and the product database for matching.
     
-    FIT_RECOMMENDATIONS = {
-        'slim': {'min_ratio': 1.4, 'max_ratio': 2.5},
-        'regular': {'min_ratio': 1.15, 'max_ratio': 1.4},
-        'oversize': {'min_ratio': 0.0, 'max_ratio': 1.15}
-    }
+    Gemini handles:
+        - Size recommendation (considering body shape + garment type)
+        - Fit type recommendation
+        - Color recommendations (based on skin tone + undertone)
+        - Styling advice
     
-    # Conversion factor for width measurements to circumference estimates
-    # Body scan captures width (front-to-back), multiply by ~2 to estimate circumference
-    WIDTH_TO_CIRCUMFERENCE_FACTOR = 2.0
+    Database handles:
+        - Finding products with matching size in stock
+        - Color variant matching
+        - Inventory availability
+    """
     
-    # Garment-specific measurement priorities
-    GARMENT_MEASUREMENTS = {
-        'shirt': {
-            'primary': ['chest', 'shoulder_width'],
-            'secondary': ['arm_length', 'torso_length'],
-            'fit_focus': 'chest',
-        },
-        'pants': {
-            'primary': ['waist', 'hip', 'inseam'],
-            'secondary': ['thigh'],
-            'fit_focus': 'waist',
-        },
-        'dress': {
-            'primary': ['chest', 'waist', 'hip'],
-            'secondary': ['torso_length'],
-            'fit_focus': 'waist',
-        },
-        'jacket': {
-            'primary': ['chest', 'shoulder_width'],
-            'secondary': ['arm_length', 'torso_length'],
-            'fit_focus': 'chest',
-        },
-        'skirt': {
-            'primary': ['waist', 'hip'],
-            'secondary': ['torso_length'],
-            'fit_focus': 'waist',
-        },
-    }
-    
-    # Body shape adjustments for size recommendations
-    # Positive = size up, Negative = size down
-    BODY_SHAPE_ADJUSTMENTS = {
-        'inverted_triangle': {'shirt': 1, 'jacket': 1, 'pants': -1, 'dress': 0, 'skirt': -1},
-        'triangle': {'shirt': -1, 'jacket': 0, 'pants': 1, 'dress': 0, 'skirt': 1},
-        'oval': {'shirt': 1, 'jacket': 1, 'pants': 1, 'dress': 1, 'skirt': 1},
-        'hourglass': {'shirt': 0, 'jacket': 0, 'pants': 0, 'dress': -1, 'skirt': 0},
-        'rectangle': {'shirt': 0, 'jacket': 0, 'pants': 0, 'dress': 0, 'skirt': 0},
-    }
-    
-    # Size order for adjustment calculations
+    # Size order for fallback calculations
     SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
     
+    # Garment-specific measurement priorities (used for fallback)
+    GARMENT_MEASUREMENTS = {
+        'shirt': {'fit_focus': 'chest'},
+        'pants': {'fit_focus': 'waist'},
+        'dress': {'fit_focus': 'waist'},
+        'jacket': {'fit_focus': 'chest'},
+        'skirt': {'fit_focus': 'waist'},
+    }
+    
     def __init__(self):
-        pass
+        self._gemini = None
     
-    def recommend_size(self, measurements: Dict[str, float]) -> str:
-        """
-        Recommend clothing size based on measurements
-        
-        Args:
-            measurements: Dict with 'height', 'chest', 'waist', 'shoulder_width'
-            
-        Returns:
-            Recommended size (S, M, L, XL, XXL)
-        """
-        from fitting_system.models import Size
-        
-        # Convert width measurements to circumference estimates
-        # Body scan captures width, but Size model uses circumference
-        chest = measurements.get('chest', 0) * self.WIDTH_TO_CIRCUMFERENCE_FACTOR
-        waist = measurements.get('waist', 0) * self.WIDTH_TO_CIRCUMFERENCE_FACTOR
-        height = measurements.get('height', 0)  # Height doesn't need conversion
-        shoulder = measurements.get('shoulder_width', 0) * self.WIDTH_TO_CIRCUMFERENCE_FACTOR
-        
-        # Find matching size based on measurements
-        # Priority: chest > waist > shoulder > height
-        matching_sizes = Size.objects.filter(
-            chest_min__lte=chest,
-            chest_max__gte=chest,
-            waist_min__lte=waist,
-            waist_max__gte=waist
-        )
-        
-        if matching_sizes.exists():
-            return matching_sizes.first().name
-        
-        # If no exact match, find closest size based on chest measurement
-        all_sizes = Size.objects.all().order_by('chest_min')
-        
-        if not all_sizes.exists():
-            return 'M'  # Fallback if no sizes in database
-        
-        if chest < all_sizes.first().chest_min:
-            return all_sizes.first().name  # Smallest size
-        elif chest > all_sizes.last().chest_max:
-            return all_sizes.last().name  # Largest size
-        else:
-            # Find closest size
-            for size in all_sizes:
-                if size.chest_min <= chest <= size.chest_max:
-                    return size.name
-        
-        # Default fallback
-        return 'M'
-
+    @property
+    def gemini(self):
+        """Lazy-load Gemini client."""
+        if self._gemini is None:
+            from .gemini_client import get_gemini_client
+            self._gemini = get_gemini_client()
+        return self._gemini
     
-    def recommend_size_for_garment(
-        self, 
-        measurements: Dict[str, float], 
-        garment_type: str,
-        body_shape: str = 'rectangle'
-    ) -> str:
+    def recommend_size(self, measurements: Dict[str, float], garment_type: str = 'shirt', body_shape: str = 'rectangle') -> str:
         """
-        Recommend size based on garment-specific measurements and body shape.
+        Recommend clothing size using Gemini AI.
+        
+        Falls back to database-based matching if Gemini is unavailable.
         
         Args:
             measurements: Body measurements dict
-            garment_type: Type of garment ('shirt', 'pants', 'dress', 'jacket', 'skirt')
-            body_shape: Body shape classification
-            
-        Returns:
-            Recommended size with body shape adjustment applied
-        """
-        from fitting_system.models import Size
-        
-        # Get garment configuration
-        config = self.GARMENT_MEASUREMENTS.get(garment_type, self.GARMENT_MEASUREMENTS['shirt'])
-        fit_focus = config['fit_focus']
-        
-        # Convert width measurement to circumference estimate
-        focus_value = measurements.get(fit_focus, 0) * self.WIDTH_TO_CIRCUMFERENCE_FACTOR
-        
-        # Find base size using the focus measurement
-        if fit_focus == 'chest':
-            matching_sizes = Size.objects.filter(
-                chest_min__lte=focus_value,
-                chest_max__gte=focus_value
-            )
-        elif fit_focus == 'waist':
-            matching_sizes = Size.objects.filter(
-                waist_min__lte=focus_value,
-                waist_max__gte=focus_value
-            )
-        else:
-            matching_sizes = Size.objects.filter(
-                chest_min__lte=focus_value,
-                chest_max__gte=focus_value
-            )
-        
-        if matching_sizes.exists():
-            base_size = matching_sizes.first().name
-        else:
-            # Fallback to generic size recommendation
-            base_size = self.recommend_size(measurements)
-        
-        # Apply body shape adjustment
-        adjusted_size = self.apply_body_shape_adjustment(base_size, body_shape, garment_type)
-        
-        return adjusted_size
-
-    
-    def apply_body_shape_adjustment(self, base_size: str, body_shape: str, garment_type: str) -> str:
-        """
-        Adjust size based on body shape.
-        
-        Args:
-            base_size: The base recommended size
-            body_shape: Body shape classification
             garment_type: Type of garment
+            body_shape: Body shape classification
             
         Returns:
-            Adjusted size
+            Recommended size string (S, M, L, XL, etc.)
         """
-        adjustment = self.BODY_SHAPE_ADJUSTMENTS.get(body_shape, {}).get(garment_type, 0)
+        # Try Gemini first
+        if self.gemini.available:
+            try:
+                result = self.gemini.get_size_recommendation(
+                    measurements=measurements,
+                    garment_type=garment_type,
+                    body_shape=body_shape
+                )
+                size = result.get("recommended_size", "M")
+                logger.info(f"Gemini size recommendation: {size} for {garment_type} (reason: {result.get('reasoning', 'N/A')})")
+                return size
+            except Exception as e:
+                logger.warning(f"Gemini size recommendation failed, using fallback: {e}")
         
-        if adjustment == 0:
-            return base_size
-        
-        try:
-            current_index = self.SIZE_ORDER.index(base_size.upper())
-            new_index = current_index + adjustment
-            
-            # Clamp to valid range
-            new_index = max(0, min(new_index, len(self.SIZE_ORDER) - 1))
-            
-            return self.SIZE_ORDER[new_index]
-        except ValueError:
-            # Size not found in order list
-            return base_size
+        # Fallback: database-based sizing
+        return self._fallback_recommend_size(measurements, garment_type)
     
-    def recommend_fit(self, measurements: Dict[str, float]) -> str:
+    def recommend_fit(self, measurements: Dict[str, float], garment_type: str = 'shirt', body_shape: str = 'rectangle') -> str:
         """
-        Recommend fit type based on body proportions
+        Recommend fit type using Gemini AI.
         
         Args:
-            measurements: Dict with 'chest' and 'waist'
+            measurements: Body measurements dict
             
         Returns:
             Recommended fit: 'slim', 'regular', or 'oversize'
         """
+        # Try Gemini first
+        if self.gemini.available:
+            try:
+                result = self.gemini.get_size_recommendation(
+                    measurements=measurements,
+                    garment_type=garment_type,
+                    body_shape=body_shape
+                )
+                fit = result.get("fit_type", "regular")
+                if fit in ["slim", "regular", "oversize"]:
+                    return fit
+            except Exception as e:
+                logger.warning(f"Gemini fit recommendation failed: {e}")
+        
+        # Fallback: ratio-based
         chest = measurements.get('chest', 0)
         waist = measurements.get('waist', 0)
         
@@ -217,45 +118,55 @@ class RecommendationEngine:
             return 'regular'
         
         ratio = chest / waist
-        
-        # Determine fit based on chest-to-waist ratio
-        if ratio >= self.FIT_RECOMMENDATIONS['slim']['min_ratio']:
+        if ratio >= 1.4:
             return 'slim'
-        elif ratio >= self.FIT_RECOMMENDATIONS['regular']['min_ratio']:
+        elif ratio >= 1.15:
             return 'regular'
         else:
             return 'oversize'
     
     def recommend_colors(self, skin_tone: str, undertone: str = 'warm') -> List[str]:
         """
-        Recommend colors based on skin tone and undertone
+        Recommend colors using Gemini AI.
         
         Args:
-            skin_tone: Skin tone category (e.g., 'very_light', 'light', 'intermediate', 'tan', 'dark')
-            undertone: Skin undertone ('warm' or 'cool')
+            skin_tone: Skin tone category
+            undertone: Skin undertone (warm/cool)
             
         Returns:
             List of recommended color names
         """
-        from fitting_system.ai_modules.skin_tone import SkinToneAnalyzer
+        # Try Gemini first
+        if self.gemini.available:
+            try:
+                colors = self.gemini.get_color_recommendations(
+                    skin_tone=skin_tone,
+                    undertone=undertone
+                )
+                if colors:
+                    return colors
+            except Exception as e:
+                logger.warning(f"Gemini color recommendation failed: {e}")
         
-        analyzer = SkinToneAnalyzer()
-        return analyzer.get_recommended_colors(skin_tone, undertone)
+        # Fallback: rule-based
+        return self.gemini._fallback_colors(skin_tone)
     
     def recommend_products(
         self,
         measurements: Dict[str, float],
         skin_tone: str,
         gender: str = 'unisex',
+        body_shape: str = 'rectangle',
         limit: int = 10
     ) -> List[Tuple[object, int]]:
         """
-        Recommend products based on measurements, skin tone, and availability
+        Recommend products based on Gemini AI analysis + database matching.
         
         Args:
             measurements: Body measurements dict
             skin_tone: Skin tone category
             gender: 'men', 'women', or 'unisex'
+            body_shape: Body shape classification
             limit: Maximum number of recommendations
             
         Returns:
@@ -263,16 +174,15 @@ class RecommendationEngine:
         """
         from fitting_system.models import Product, ProductVariant, Color
         
-        # Get recommendations
-        recommended_size = self.recommend_size(measurements)
-        recommended_fit = self.recommend_fit(measurements)
+        # Get AI-powered recommendations
+        recommended_size = self.recommend_size(measurements, body_shape=body_shape)
+        recommended_fit = self.recommend_fit(measurements, body_shape=body_shape)
         recommended_color_names = self.recommend_colors(skin_tone)
         
-        # Get recommended color objects
+        # Get recommended color objects from DB
         recommended_colors = Color.objects.filter(name__in=recommended_color_names)
         
-        # Filter products by gender only (not strict fit filtering)
-        # This ensures we always have products to recommend
+        # Filter products by gender
         products = Product.objects.filter(
             Q(gender=gender) | Q(gender='unisex')
         )
@@ -280,42 +190,38 @@ class RecommendationEngine:
         recommendations = []
         
         for product in products:
-            # Check if product has any available variants
+            # Check availability
             available_variants = ProductVariant.objects.filter(
                 product=product,
-                inventory__quantity__gt=0  # Only available items
+                inventory__quantity__gt=0
             )
             
             if not available_variants.exists():
                 continue
             
-            # Calculate priority score
             priority = 0
             
             # Higher priority for matching fit type
             if product.fit_type == recommended_fit:
                 priority += 15
             
-            # Higher priority for products with recommended size in stock
+            # Higher priority for matching size in stock
             size_variants = available_variants.filter(size__name=recommended_size)
             if size_variants.exists():
                 priority += 10
             
-            # Higher priority for products with recommended colors
+            # Higher priority for matching colors
             matching_color_variants = available_variants.filter(
                 color__in=recommended_colors
             )
             if matching_color_variants.exists():
                 priority += 10
             
-            # Add base priority
-            priority += 5
+            priority += 5  # Base priority
             
             recommendations.append((product, priority))
         
-        # Sort by priority (descending) and limit results
         recommendations.sort(key=lambda x: x[1], reverse=True)
-        
         return recommendations[:limit]
     
     def get_matching_product_variants(
@@ -326,16 +232,11 @@ class RecommendationEngine:
     ) -> List[Dict]:
         """
         Get actual products from store with specific size and color recommendations.
-        
-        This method finds products that:
-        1. Have the user's recommended size in stock
-        2. Preferably have a color that matches their skin tone
-        3. Match the user's preferred gender (if specified)
-        4. Prioritize products matching recommended fit type
+        Uses Gemini AI for size/color/fit recommendations, then matches against inventory.
         
         Args:
             body_scan: BodyScan model instance
-            gender: Optional gender filter ('men', 'women', or None for all)
+            gender: Optional gender filter
             limit: Maximum number of products to return
             
         Returns:
@@ -362,9 +263,9 @@ class RecommendationEngine:
         body_shape = getattr(body_scan, 'body_shape', 'rectangle') or 'rectangle'
         undertone = getattr(body_scan, 'undertone', 'warm')
         
-        # Get recommended colors for user's skin tone
+        # Get Gemini-powered recommendations
         recommended_color_names = self.recommend_colors(body_scan.skin_tone, undertone)
-        recommended_fit = self.recommend_fit(measurements)
+        recommended_fit = self.recommend_fit(measurements, body_shape=body_shape)
         
         # Find matching products
         matching_products = []
@@ -378,14 +279,13 @@ class RecommendationEngine:
             products = Product.objects.all()
         
         for product in products:
-            # Get garment-specific size for this product
-            rec_size = self.recommend_size_for_garment(
+            # Get Gemini-powered garment-specific size recommendation
+            rec_size = self.recommend_size(
                 measurements, 
-                product.category, 
-                body_shape
+                garment_type=product.category, 
+                body_shape=body_shape
             )
             
-            # Check if product fit matches recommended fit
             fit_matches = product.fit_type == recommended_fit
             
             # Priority 1: Exact size + recommended color + in stock
@@ -432,7 +332,7 @@ class RecommendationEngine:
                     'fit_message': f"This {product.category} in size {rec_size} will fit you great!"
                 })
         
-        # Sort: products matching recommended fit first, then perfect matches, then by name
+        # Sort: fit matches first, then perfect matches, then by name
         matching_products.sort(key=lambda x: (
             not x['fit_matches_recommendation'],
             not x['is_perfect_match'], 
@@ -440,12 +340,10 @@ class RecommendationEngine:
         ))
         
         return matching_products[:limit]
-
     
     def generate_recommendations_for_scan(self, body_scan) -> List[object]:
         """
-        Generate and save recommendations for a body scan.
-        Uses garment-specific sizing and body shape adjustments.
+        Generate and save recommendations for a body scan using Gemini AI.
         
         Args:
             body_scan: BodyScan model instance
@@ -455,7 +353,7 @@ class RecommendationEngine:
         """
         from fitting_system.models import Recommendation
         
-        # Build measurements dict including new fashion measurements
+        # Build measurements dict
         measurements = {
             'height': float(body_scan.height),
             'chest': float(body_scan.chest),
@@ -463,7 +361,6 @@ class RecommendationEngine:
             'shoulder_width': float(body_scan.shoulder_width)
         }
         
-        # Add fashion-specific measurements if available
         if body_scan.hip:
             measurements['hip'] = float(body_scan.hip)
         if body_scan.torso_length:
@@ -473,15 +370,12 @@ class RecommendationEngine:
         if body_scan.inseam:
             measurements['inseam'] = float(body_scan.inseam)
         
-        # Get body shape (with backward compatibility)
         body_shape = getattr(body_scan, 'body_shape', 'rectangle') or 'rectangle'
-        
-        # Get base recommendations
-        base_recommended_size = self.recommend_size(measurements)
-        recommended_fit = self.recommend_fit(measurements)
-        
-        # Use undertone for color recommendations (with backward compatibility)
         undertone = getattr(body_scan, 'undertone', 'warm')
+        
+        # Get Gemini-powered recommendations
+        base_recommended_size = self.recommend_size(measurements, body_shape=body_shape)
+        recommended_fit = self.recommend_fit(measurements, body_shape=body_shape)
         recommended_colors = self.recommend_colors(body_scan.skin_tone, undertone)
         
         # Get product recommendations
@@ -492,6 +386,7 @@ class RecommendationEngine:
                 measurements,
                 body_scan.skin_tone,
                 gender=gender,
+                body_shape=body_shape,
                 limit=10
             )
             product_recommendations.extend(recs)
@@ -506,14 +401,14 @@ class RecommendationEngine:
         
         unique_recommendations.sort(key=lambda x: x[1], reverse=True)
         
-        # Create Recommendation objects with garment-specific sizing
+        # Create Recommendation objects
         recommendation_objects = []
         for product, priority in unique_recommendations[:10]:
-            # Get garment-specific size with body shape adjustment
-            recommended_size = self.recommend_size_for_garment(
+            # Get Gemini garment-specific size recommendation
+            recommended_size = self.recommend_size(
                 measurements, 
-                product.category,
-                body_shape
+                garment_type=product.category,
+                body_shape=body_shape
             )
             
             rec = Recommendation.objects.create(
@@ -527,3 +422,40 @@ class RecommendationEngine:
             recommendation_objects.append(rec)
         
         return recommendation_objects
+    
+    # --- Fallback Methods (when Gemini is unavailable) ---
+    
+    def _fallback_recommend_size(self, measurements: Dict[str, float], garment_type: str = 'shirt') -> str:
+        """Database-based size recommendation fallback."""
+        from fitting_system.models import Size
+        
+        chest = measurements.get('chest', 0)
+        waist = measurements.get('waist', 0)
+        
+        # Find matching size based on measurements
+        matching_sizes = Size.objects.filter(
+            chest_min__lte=chest,
+            chest_max__gte=chest,
+            waist_min__lte=waist,
+            waist_max__gte=waist
+        )
+        
+        if matching_sizes.exists():
+            return matching_sizes.first().name
+        
+        # Find closest size based on chest measurement
+        all_sizes = Size.objects.all().order_by('chest_min')
+        
+        if not all_sizes.exists():
+            return 'M'
+        
+        if chest < all_sizes.first().chest_min:
+            return all_sizes.first().name
+        elif chest > all_sizes.last().chest_max:
+            return all_sizes.last().name
+        else:
+            for size in all_sizes:
+                if size.chest_min <= chest <= size.chest_max:
+                    return size.name
+        
+        return 'M'

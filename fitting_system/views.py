@@ -11,7 +11,6 @@ from PIL import Image
 
 from .models import Product, ProductVariant, Inventory, BodyScan, Recommendation, Size, Color
 from .ai_modules.body_measurement import BodyMeasurementEstimator
-from .ai_modules.skin_tone import SkinToneAnalyzer
 from .ai_modules.recommendation_engine import RecommendationEngine
 
 
@@ -38,7 +37,13 @@ def scan(request):
 
 @csrf_exempt
 def process_scan(request):
-    """Process captured images with AI modules"""
+    """
+    Process captured images with Gemini AI.
+    
+    Architecture:
+        - MediaPipe: Already used in camera for pose visualization (client-side)
+        - Gemini API: Extracts measurements + body shape + skin tone (this endpoint)
+    """
     if request.method != 'POST':
         return JsonResponse({'error': 'POST method required'}, status=400)
     
@@ -49,49 +54,43 @@ def process_scan(request):
         front_image_data = data.get('front_image')
         front_frames_data = data.get('front_frames', [])
         side_image_data = data.get('side_image')
-        side_frames_data = data.get('side_frames', [])
-        skin_image_data = data.get('skin_image')  # Separate skin tone image
         
         if not front_image_data and not front_frames_data:
             return JsonResponse({'error': 'Front image is required'}, status=400)
         
-        # Import body shape classifier
-        from .ai_modules.body_shape import classify_body_shape
-        
         measurement_estimator = get_estimator()
         
-        # Determine if using multi-frame or single image
+        # Select the best frame for Gemini analysis
         if front_frames_data and len(front_frames_data) > 0:
-            # Multi-frame mode (fashion-grade)
+            # Multi-frame mode: select middle frame (best quality)
             front_images = [decode_base64_image(f) for f in front_frames_data if f]
-            measurements = measurement_estimator.estimate_with_stability(front_images)
+            best_idx = len(front_images) // 2
+            front_image = front_images[best_idx]
             frame_count = len(front_images)
         else:
-            # Single image mode (backward compatible)
+            # Single image mode
             front_image = decode_base64_image(front_image_data)
-            side_image = decode_base64_image(side_image_data) if side_image_data else None
-            measurements = measurement_estimator.estimate_from_front_and_side(
-                front_image, 
-                side_image
-            )
             frame_count = 1
         
-        # Classify body shape based on measurements
-        body_shape = classify_body_shape(measurements)
+        side_image = decode_base64_image(side_image_data) if side_image_data else None
         
-        # Analyze skin tone - use dedicated skin image if available
-        skin_image = decode_base64_image(skin_image_data) if skin_image_data else None
-        if skin_image is None:
-            # Fall back to first available image
-            if front_frames_data:
-                skin_image = decode_base64_image(front_frames_data[0])
-            elif front_image_data:
-                skin_image = decode_base64_image(front_image_data)
+        # === SINGLE GEMINI CALL FOR EVERYTHING ===
+        # This replaces the old separate calls to:
+        #   1. MediaPipe landmark math (measurements)
+        #   2. body_shape.classify_body_shape()
+        #   3. SkinToneAnalyzer.analyze_skin_tone_detailed()
+        analysis = measurement_estimator.analyze_body_complete(
+            front_image=front_image,
+            side_image=side_image,
+        )
         
-        skin_tone_analyzer = SkinToneAnalyzer()
-        skin_analysis = skin_tone_analyzer.analyze_skin_tone_detailed(skin_image)
+        measurements = analysis['measurements']
+        body_shape = analysis['body_shape']
+        skin_tone = analysis['skin_tone']
+        undertone = analysis['undertone']
+        confidence = analysis.get('confidence', 0.8)
         
-        # Create BodyScan record with all new fields
+        # Create BodyScan record
         body_scan = BodyScan.objects.create(
             # Core measurements
             height=measurements.get('height', 170),
@@ -103,17 +102,17 @@ def process_scan(request):
             torso_length=measurements.get('torso_length'),
             arm_length=measurements.get('arm_length'),
             inseam=measurements.get('inseam'),
-            # Body shape
+            # Body shape (from Gemini)
             body_shape=body_shape,
-            # Skin analysis
-            skin_tone=skin_analysis.skin_tone,
-            undertone=skin_analysis.undertone,
+            # Skin analysis (from Gemini)
+            skin_tone=skin_tone,
+            undertone=undertone,
             # Quality metrics
-            confidence_score=skin_analysis.confidence,
+            confidence_score=confidence,
             frame_count=frame_count,
         )
         
-        # Generate recommendations
+        # Generate recommendations (also Gemini-powered)
         rec_engine = RecommendationEngine()
         recommendations = rec_engine.generate_recommendations_for_scan(body_scan)
         
@@ -123,12 +122,11 @@ def process_scan(request):
             'measurements': measurements,
             'body_shape': body_shape,
             'body_shape_display': body_shape.replace('_', ' ').title(),
-            'skin_tone': skin_analysis.skin_tone,
-            'skin_tone_display': skin_analysis.skin_tone.replace('_', ' ').title(),
-            'undertone': skin_analysis.undertone,
-            'undertone_display': skin_analysis.undertone.title(),
-            'ita_value': round(skin_analysis.ita_value, 2),
-            'confidence': round(skin_analysis.confidence, 2),
+            'skin_tone': skin_tone,
+            'skin_tone_display': skin_tone.replace('_', ' ').title(),
+            'undertone': undertone,
+            'undertone_display': undertone.title(),
+            'confidence': round(confidence, 2),
             'frame_count': frame_count,
         })
         

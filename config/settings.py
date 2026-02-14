@@ -128,3 +128,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Gemini AI Configuration
+# Set your API key here or via environment variable GEMINI_API_KEY
+import os
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyA_nbqKfxEQsB6AyAd2rAJV5Ig5bcwRGAE')
+
