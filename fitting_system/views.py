@@ -89,6 +89,8 @@ def process_scan(request):
         skin_tone = analysis['skin_tone']
         undertone = analysis['undertone']
         confidence = analysis.get('confidence', 0.8)
+        is_fallback = analysis.get('is_fallback', False)
+        error_message = analysis.get('error_message', '')
         
         # Create BodyScan record
         body_scan = BodyScan.objects.create(
@@ -110,6 +112,8 @@ def process_scan(request):
             # Quality metrics
             confidence_score=confidence,
             frame_count=frame_count,
+            is_fallback=is_fallback,
+            error_message=error_message,
         )
         
         # Generate recommendations (also Gemini-powered)
@@ -128,6 +132,8 @@ def process_scan(request):
             'undertone_display': undertone.title(),
             'confidence': round(confidence, 2),
             'frame_count': frame_count,
+            'is_fallback': is_fallback,
+            'error_message': error_message,
         })
         
     except ValueError as e:

@@ -38,8 +38,8 @@ class GeminiClient:
         5. Generate intelligent fit/style recommendations
     """
     
-    # Gemini model to use - gemini-2.0-flash for fast vision tasks
-    MODEL_NAME = "gemini-2.0-flash"
+    # Gemini model to use - gemini-2.5-flash for fast vision tasks
+    MODEL_NAME = "gemini-2.5-flash"
     
     def __init__(self, api_key: str = None):
         """
@@ -216,7 +216,9 @@ Respond with ONLY the JSON object, no explanations."""
                 "body_shape": "rectangle",
                 "skin_tone": "medium",
                 "undertone": "warm",
-                "confidence": 0.3
+                "confidence": 0.3,
+                "is_fallback": True,
+                "error_message": "Gemini SDK not installed or API key missing"
             }
         
         height_instruction = ""
@@ -284,7 +286,9 @@ Respond with ONLY the JSON object."""
                     "body_shape": "rectangle",
                     "skin_tone": "medium",
                     "undertone": "warm",
-                    "confidence": 0.3
+                    "confidence": 0.3,
+                    "is_fallback": True,
+                    "error_message": "Invalid API response"
                 }
             
             # Validate measurements
@@ -317,7 +321,9 @@ Respond with ONLY the JSON object."""
                 "body_shape": "rectangle",
                 "skin_tone": "medium",
                 "undertone": "warm",
-                "confidence": 0.3
+                "confidence": 0.3,
+                "is_fallback": True,
+                "error_message": str(e)
             }
     
     def get_size_recommendation(

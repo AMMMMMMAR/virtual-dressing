@@ -272,7 +272,9 @@ class BodyMeasurementEstimator:
                 "body_shape": "rectangle",
                 "skin_tone": "medium",
                 "undertone": "warm",
-                "confidence": 0.3
+                "confidence": 0.3,
+                "is_fallback": True,
+                "error_message": f"Analysis failed: {str(e)}"
             }
     
     def estimate_with_stability(
