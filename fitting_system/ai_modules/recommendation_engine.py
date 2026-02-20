@@ -59,7 +59,7 @@ class RecommendationEngine:
         """
         Recommend clothing size using Gemini AI.
         
-        Falls back to database-based matching if Gemini is unavailable.
+        Raises RuntimeError/ValueError if Gemini is unavailable or fails.
         
         Args:
             measurements: Body measurements dict
@@ -69,26 +69,23 @@ class RecommendationEngine:
         Returns:
             Recommended size string (S, M, L, XL, etc.)
         """
-        # Try Gemini first
-        if self.gemini.available:
-            try:
-                result = self.gemini.get_size_recommendation(
-                    measurements=measurements,
-                    garment_type=garment_type,
-                    body_shape=body_shape
-                )
-                size = result.get("recommended_size", "M")
-                logger.info(f"Gemini size recommendation: {size} for {garment_type} (reason: {result.get('reasoning', 'N/A')})")
-                return size
-            except Exception as e:
-                logger.warning(f"Gemini size recommendation failed, using fallback: {e}")
-        
-        # Fallback: database-based sizing
-        return self._fallback_recommend_size(measurements, garment_type)
+        if not self.gemini.available:
+            raise RuntimeError("Gemini AI is not available for size recommendation")
+
+        result = self.gemini.get_size_recommendation(
+            measurements=measurements,
+            garment_type=garment_type,
+            body_shape=body_shape
+        )
+        size = result.get("recommended_size", "M")
+        logger.info(f"Gemini size recommendation: {size} for {garment_type} (reason: {result.get('reasoning', 'N/A')})")
+        return size
     
     def recommend_fit(self, measurements: Dict[str, float], garment_type: str = 'shirt', body_shape: str = 'rectangle') -> str:
         """
         Recommend fit type using Gemini AI.
+        
+        Raises RuntimeError if Gemini is unavailable or fails.
         
         Args:
             measurements: Body measurements dict
@@ -96,38 +93,24 @@ class RecommendationEngine:
         Returns:
             Recommended fit: 'slim', 'regular', or 'oversize'
         """
-        # Try Gemini first
-        if self.gemini.available:
-            try:
-                result = self.gemini.get_size_recommendation(
-                    measurements=measurements,
-                    garment_type=garment_type,
-                    body_shape=body_shape
-                )
-                fit = result.get("fit_type", "regular")
-                if fit in ["slim", "regular", "oversize"]:
-                    return fit
-            except Exception as e:
-                logger.warning(f"Gemini fit recommendation failed: {e}")
-        
-        # Fallback: ratio-based
-        chest = measurements.get('chest', 0)
-        waist = measurements.get('waist', 0)
-        
-        if waist == 0:
-            return 'regular'
-        
-        ratio = chest / waist
-        if ratio >= 1.4:
-            return 'slim'
-        elif ratio >= 1.15:
-            return 'regular'
-        else:
-            return 'oversize'
+        if not self.gemini.available:
+            raise RuntimeError("Gemini AI is not available for fit recommendation")
+
+        result = self.gemini.get_size_recommendation(
+            measurements=measurements,
+            garment_type=garment_type,
+            body_shape=body_shape
+        )
+        fit = result.get("fit_type", "regular")
+        if fit in ["slim", "regular", "oversize"]:
+            return fit
+        return "regular"
     
     def recommend_colors(self, skin_tone: str, undertone: str = 'warm') -> List[str]:
         """
         Recommend colors using Gemini AI.
+        
+        Raises RuntimeError if Gemini is unavailable or fails.
         
         Args:
             skin_tone: Skin tone category
@@ -136,20 +119,16 @@ class RecommendationEngine:
         Returns:
             List of recommended color names
         """
-        # Try Gemini first
-        if self.gemini.available:
-            try:
-                colors = self.gemini.get_color_recommendations(
-                    skin_tone=skin_tone,
-                    undertone=undertone
-                )
-                if colors:
-                    return colors
-            except Exception as e:
-                logger.warning(f"Gemini color recommendation failed: {e}")
-        
-        # Fallback: rule-based
-        return self.gemini._fallback_colors(skin_tone)
+        if not self.gemini.available:
+            raise RuntimeError("Gemini AI is not available for color recommendation")
+
+        colors = self.gemini.get_color_recommendations(
+            skin_tone=skin_tone,
+            undertone=undertone
+        )
+        if colors:
+            return colors
+        raise ValueError("Gemini returned empty color recommendations")
     
     def recommend_products(
         self,
@@ -423,39 +402,4 @@ class RecommendationEngine:
         
         return recommendation_objects
     
-    # --- Fallback Methods (when Gemini is unavailable) ---
-    
-    def _fallback_recommend_size(self, measurements: Dict[str, float], garment_type: str = 'shirt') -> str:
-        """Database-based size recommendation fallback."""
-        from fitting_system.models import Size
-        
-        chest = measurements.get('chest', 0)
-        waist = measurements.get('waist', 0)
-        
-        # Find matching size based on measurements
-        matching_sizes = Size.objects.filter(
-            chest_min__lte=chest,
-            chest_max__gte=chest,
-            waist_min__lte=waist,
-            waist_max__gte=waist
-        )
-        
-        if matching_sizes.exists():
-            return matching_sizes.first().name
-        
-        # Find closest size based on chest measurement
-        all_sizes = Size.objects.all().order_by('chest_min')
-        
-        if not all_sizes.exists():
-            return 'M'
-        
-        if chest < all_sizes.first().chest_min:
-            return all_sizes.first().name
-        elif chest > all_sizes.last().chest_max:
-            return all_sizes.last().name
-        else:
-            for size in all_sizes:
-                if size.chest_min <= chest <= size.chest_max:
-                    return size.name
-        
-        return 'M'
+    # _fallback_recommend_size REMOVED – Gemini AI is the sole source.

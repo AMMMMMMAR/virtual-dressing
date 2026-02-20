@@ -177,7 +177,7 @@ class BodyMeasurementEstimator:
         """
         from .gemini_client import get_gemini_client
         
-        try:
+        if True:
             # Convert OpenCV image to JPEG bytes for Gemini
             image_bytes = self._image_to_bytes(image_data)
             
@@ -190,10 +190,6 @@ class BodyMeasurementEstimator:
             
             logger.info(f"Gemini measurements: {measurements}")
             return measurements
-            
-        except Exception as e:
-            logger.error(f"Gemini measurement extraction failed: {e}")
-            return self._fallback_measurements(reference_height_cm)
     
     def estimate_from_front_and_side(
         self, 
@@ -208,7 +204,7 @@ class BodyMeasurementEstimator:
         """
         from .gemini_client import get_gemini_client
         
-        try:
+        if True:
             front_bytes = self._image_to_bytes(front_image)
             side_bytes = self._image_to_bytes(side_image) if side_image is not None else None
             
@@ -220,10 +216,6 @@ class BodyMeasurementEstimator:
             )
             
             return measurements
-            
-        except Exception as e:
-            logger.error(f"Gemini front+side measurement failed: {e}")
-            return self._fallback_measurements(reference_height_cm)
     
     def analyze_body_complete(
         self,
@@ -252,7 +244,7 @@ class BodyMeasurementEstimator:
         """
         from .gemini_client import get_gemini_client
         
-        try:
+        if True:
             front_bytes = self._image_to_bytes(front_image)
             side_bytes = self._image_to_bytes(side_image) if side_image is not None else None
             
@@ -264,16 +256,6 @@ class BodyMeasurementEstimator:
             )
             
             return result
-            
-        except Exception as e:
-            logger.error(f"Gemini complete analysis failed: {e}")
-            return {
-                "measurements": self._fallback_measurements(reference_height_cm),
-                "body_shape": "rectangle",
-                "skin_tone": "medium",
-                "undertone": "warm",
-                "confidence": 0.3
-            }
     
     def estimate_with_stability(
         self, 
@@ -294,7 +276,7 @@ class BodyMeasurementEstimator:
             Dictionary with measurements
         """
         if not frames:
-            return self._fallback_measurements(reference_height_cm)
+            raise ValueError("No frames provided for measurement estimation")
         
         # Select the middle frame (usually best quality/pose)
         best_frame_idx = len(frames) // 2
@@ -312,23 +294,9 @@ class BodyMeasurementEstimator:
             raise ValueError("Failed to encode image to JPEG")
         return buffer.tobytes()
     
-    @staticmethod
-    def _fallback_measurements(reference_height_cm: Optional[float] = None) -> Dict[str, float]:
-        """
-        Fallback measurements based on average body proportions.
-        Used when Gemini is unavailable.
-        """
-        height = reference_height_cm or 170.0
-        return {
-            'height': height,
-            'shoulder_width': round(height * 0.25, 1),
-            'chest': round(height * 0.55, 1),
-            'waist': round(height * 0.47, 1),
-            'hip': round(height * 0.55, 1),
-            'torso_length': round(height * 0.30, 1),
-            'arm_length': round(height * 0.33, 1),
-            'inseam': round(height * 0.45, 1),
-        }
+    
+    # _fallback_measurements REMOVED to force error propagation
+
     
     @staticmethod
     def normalize_measurement(value: float, round_to: float = 0.5, min_val: float = 0, max_val: float = 300) -> float:
