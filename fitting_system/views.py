@@ -8,22 +8,35 @@ import numpy as np
 import cv2
 from io import BytesIO
 from PIL import Image
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .models import Product, ProductVariant, Inventory, BodyScan, Recommendation, Size, Color
-from .ai_modules.body_measurement import BodyMeasurementEstimator
-from .ai_modules.recommendation_engine import RecommendationEngine
+from .ai_modules.yolo_analyzer import get_yolo_analyzer
 
 
-# Global estimator instance
-_MEASUREMENT_ESTIMATOR = None
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-def get_estimator():
-    """Get or initialize the global estimator instance"""
-    global _MEASUREMENT_ESTIMATOR
-    if _MEASUREMENT_ESTIMATOR is None:
-        _MEASUREMENT_ESTIMATOR = BodyMeasurementEstimator()
-    return _MEASUREMENT_ESTIMATOR
+def decode_base64_image(base64_string):
+    """Decode base64 image to numpy array (BGR)."""
+    if not base64_string:
+        return None
+    if ',' in base64_string:
+        base64_string = base64_string.split(',')[1]
+    image_data = base64.b64decode(base64_string)
+    pil_image  = Image.open(BytesIO(image_data))
+    image_array = np.array(pil_image)
+    if len(image_array.shape) == 3 and image_array.shape[2] == 3:
+        return cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
+    return image_array
 
+
+# ---------------------------------------------------------------------------
+# Page views
+# ---------------------------------------------------------------------------
 
 def index(request):
     """Landing page"""
@@ -35,281 +48,223 @@ def scan(request):
     return render(request, 'scan.html')
 
 
-@csrf_exempt
-def process_scan(request):
-    """
-    Process captured images with Gemini AI.
-    
-    Architecture:
-        - MediaPipe: Already used in camera for pose visualization (client-side)
-        - Gemini API: Extracts measurements + body shape + skin tone (this endpoint)
-    """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST method required'}, status=400)
-    
-    try:
-        data = json.loads(request.body)
-        
-        # Support both single image and multi-frame input
-        front_image_data = data.get('front_image')
-        front_frames_data = data.get('front_frames', [])
-        side_image_data = data.get('side_image')
-        
-        if not front_image_data and not front_frames_data:
-            return JsonResponse({'error': 'Front image is required'}, status=400)
-        
-        measurement_estimator = get_estimator()
-        
-        # Select the best frame for Gemini analysis
-        if front_frames_data and len(front_frames_data) > 0:
-            # Multi-frame mode: select middle frame (best quality)
-            front_images = [decode_base64_image(f) for f in front_frames_data if f]
-            best_idx = len(front_images) // 2
-            front_image = front_images[best_idx]
-            frame_count = len(front_images)
-        else:
-            # Single image mode
-            front_image = decode_base64_image(front_image_data)
-            frame_count = 1
-        
-        side_image = decode_base64_image(side_image_data) if side_image_data else None
-        
-        # === SINGLE GEMINI CALL FOR EVERYTHING ===
-        # This replaces the old separate calls to:
-        #   1. MediaPipe landmark math (measurements)
-        #   2. body_shape.classify_body_shape()
-        #   3. SkinToneAnalyzer.analyze_skin_tone_detailed()
-        analysis = measurement_estimator.analyze_body_complete(
-            front_image=front_image,
-            side_image=side_image,
-        )
-        
-        measurements = analysis['measurements']
-        body_shape = analysis['body_shape']
-        skin_tone = analysis['skin_tone']
-        undertone = analysis['undertone']
-        confidence = analysis.get('confidence', 0.8)
-        is_fallback = analysis.get('is_fallback', False)
-        error_message = analysis.get('error_message', '')
-        
-        # Create BodyScan record
-        body_scan = BodyScan.objects.create(
-            # Core measurements
-            height=measurements.get('height', 170),
-            shoulder_width=measurements.get('shoulder_width', 42),
-            chest=measurements.get('chest', 95),
-            waist=measurements.get('waist', 80),
-            # Fashion-specific measurements
-            hip=measurements.get('hip'),
-            torso_length=measurements.get('torso_length'),
-            arm_length=measurements.get('arm_length'),
-            inseam=measurements.get('inseam'),
-            # Body shape (from Gemini)
-            body_shape=body_shape,
-            # Skin analysis (from Gemini)
-            skin_tone=skin_tone,
-            undertone=undertone,
-            # Quality metrics
-            confidence_score=confidence,
-            frame_count=frame_count,
-            is_fallback=is_fallback,
-            error_message=error_message,
-        )
-        
-        # Generate recommendations (also Gemini-powered)
-        rec_engine = RecommendationEngine()
-        recommendations = rec_engine.generate_recommendations_for_scan(body_scan)
-        
-        return JsonResponse({
-            'success': True,
-            'session_id': str(body_scan.session_id),
-            'measurements': measurements,
-            'body_shape': body_shape,
-            'body_shape_display': body_shape.replace('_', ' ').title(),
-            'skin_tone': skin_tone,
-            'skin_tone_display': skin_tone.replace('_', ' ').title(),
-            'undertone': undertone,
-            'undertone_display': undertone.title(),
-            'confidence': round(confidence, 2),
-            'frame_count': frame_count,
-            'is_fallback': is_fallback,
-            'error_message': error_message,
-        })
-        
-    except ValueError as e:
-        return JsonResponse({'error': str(e)}, status=400)
-    except Exception as e:
-        return JsonResponse({'error': f'Processing failed: {str(e)}'}, status=500)
-
+# ---------------------------------------------------------------------------
+# API: real-time frame analysis
+# ---------------------------------------------------------------------------
 
 @csrf_exempt
 def analyze_frame(request):
-    """Analyze single frame for real-time feedback"""
+    """
+    Analyse a single camera frame for real-time feedback.
+    mode='body'  → YOLO pose detection (body step)
+    mode='face'  → face detection (skin-tone selfie step)
+    """
     if request.method != 'POST':
         return JsonResponse({'error': 'POST method required'}, status=400)
-    
+
     try:
-        data = json.loads(request.body)
+        data       = json.loads(request.body)
         image_data = data.get('image')
-        mode = data.get('mode', 'body')  # 'body' for full body, 'face' for skin tone selfie
-        
+        mode       = data.get('mode', 'body')
+
         if not image_data:
             return JsonResponse({'error': 'Image is required'}, status=400)
-        
-        # Decode image
-        image = decode_base64_image(image_data)
-        
+
+        image   = decode_base64_image(image_data)
+        analyzer = get_yolo_analyzer()
+
         if mode == 'face':
-            # Face mode for skin tone - check if face is close and centered
-            result = analyze_face_for_skin_tone(image)
+            result = analyzer.analyze_face_frame(image)
         else:
-            # Body mode - analyze full body pose
-            estimator = get_estimator()
-            result = estimator.analyze_pose(image)
-        
+            result = analyzer.analyze_pose_frame(image)
+
         return JsonResponse(result)
-        
+
     except Exception as e:
         return JsonResponse({'error': str(e), 'detected': False}, status=500)
 
 
-def analyze_face_for_skin_tone(image):
-    """
-    Analyze face position for skin tone capture.
-    Checks if face is close enough and centered.
-    """
-    import cv2
-    
-    h, w = image.shape[:2]
-    
-    # Use OpenCV's face detection (Haar cascade) for quick face detection
-    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-    
-    # Convert to grayscale for face detection
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
-    # Detect faces
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
-    
-    if len(faces) == 0:
-        return {
-            "detected": False,
-            "message": "No face detected - look at the camera",
-            "status": "error",
-            "quality": 0.0,
-            "landmarks": []
-        }
-    
-    # Get the largest face (closest to camera)
-    largest_face = max(faces, key=lambda f: f[2] * f[3])
-    x, y, fw, fh = largest_face
-    
-    # Calculate face center
-    face_center_x = x + fw / 2
-    face_center_y = y + fh / 2
-    
-    # Check face size (should be large for close-up selfie)
-    face_area_ratio = (fw * fh) / (w * h)
-    
-    # Check if face is centered
-    center_x_ratio = abs(face_center_x - w / 2) / w
-    center_y_ratio = abs(face_center_y - h / 2) / h
-    
-    # Determine status and message
-    if face_area_ratio < 0.08:
-        # Face is too small - user is too far
-        return {
-            "detected": True,
-            "message": "Move CLOSER to the camera",
-            "status": "warning",
-            "quality": 0.4,
-            "landmarks": []
-        }
-    elif face_area_ratio < 0.15:
-        # Face is medium - could be closer
-        return {
-            "detected": True,
-            "message": "A bit closer for better accuracy",
-            "status": "warning",
-            "quality": 0.6,
-            "landmarks": []
-        }
-    elif center_x_ratio > 0.25 or center_y_ratio > 0.25:
-        # Face is not centered
-        return {
-            "detected": True,
-            "message": "Center your face in the circle",
-            "status": "warning",
-            "quality": 0.7,
-            "landmarks": []
-        }
-    else:
-        # Perfect position!
-        return {
-            "detected": True,
-            "message": "Perfect! Hold still...",
-            "status": "good",
-            "quality": 0.95,
-            "landmarks": []
-        }
+# ---------------------------------------------------------------------------
+# API: process full scan (body image + face image)
+# ---------------------------------------------------------------------------
 
+@csrf_exempt
+def process_scan(request):
+    """
+    Process two captured images:
+        front_image  – full-body front view  → YOLO pose + measurements
+        face_image   – close-up selfie       → skin-tone extraction
+    Then ask the LLM for a recommended size letter.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=400)
+
+    try:
+        data = json.loads(request.body)
+
+        front_image_data = data.get('front_image')
+        face_image_data  = data.get('face_image')
+        side_image_data  = data.get('side_image')   # kept for backward compat
+        user_height_cm   = data.get('user_height_cm')
+
+        if not front_image_data:
+            return JsonResponse({'error': 'Front (body) image is required'}, status=400)
+        if not face_image_data:
+            return JsonResponse({'error': 'Face image is required for skin tone detection'}, status=400)
+
+        # Validate user height
+        if user_height_cm is None:
+            return JsonResponse({'error': 'Height is required. Please enter your height in cm.'}, status=400)
+        try:
+            user_height_cm = float(user_height_cm)
+        except (TypeError, ValueError):
+            return JsonResponse({'error': 'Height must be a valid number in cm.'}, status=400)
+        if user_height_cm < 100 or user_height_cm > 250:
+            return JsonResponse({'error': 'Height must be between 100 and 250 cm.'}, status=400)
+
+        front_image = decode_base64_image(front_image_data)
+        face_image  = decode_base64_image(face_image_data)
+
+        analyzer = get_yolo_analyzer()
+
+        # Full pipeline: measurements + skin tone + LLM size
+        analysis = analyzer.full_analysis(
+            body_image_bgr=front_image,
+            face_image_bgr=face_image,
+            user_height_cm=user_height_cm,
+        )
+
+        measurements     = analysis['measurements']
+        skin_tone        = analysis['skin_tone']
+        undertone        = analysis['undertone']
+        recommended_size = analysis['recommended_size']
+        confidence       = analysis.get('confidence', 0.85)
+
+        # Persist to DB
+        body_scan = BodyScan.objects.create(
+            height          = measurements.get('height', 170),
+            shoulder_width  = measurements.get('shoulder_width', 42),
+            chest           = measurements.get('chest', 92),
+            waist           = measurements.get('waist', 78),
+            hip             = measurements.get('hip'),
+            torso_length    = measurements.get('torso_length'),
+            arm_length      = measurements.get('arm_length'),
+            inseam          = measurements.get('inseam'),
+            body_shape      = 'rectangle',   # not used in new flow
+            skin_tone       = skin_tone,
+            undertone       = undertone,
+            confidence_score= confidence,
+            frame_count     = 1,
+        )
+
+        # Store the LLM-recommended size as a Recommendation record
+        # (we create one generic record so the recommendations view can read it)
+        try:
+            Recommendation.objects.create(
+                body_scan         = body_scan,
+                product           = Product.objects.first(),   # placeholder
+                recommended_size  = recommended_size,
+                recommended_fit   = 'regular',
+                recommended_colors= '',
+                priority          = 100,
+            )
+        except Exception:
+            pass   # no products in DB yet – that's fine
+
+        return JsonResponse({
+            'success':          True,
+            'session_id':       str(body_scan.session_id),
+            'skin_tone':        skin_tone,
+            'skin_tone_display': skin_tone.replace('_', ' ').title(),
+            'undertone':        undertone,
+            'recommended_size': recommended_size,
+            'confidence':       round(confidence, 2),
+        })
+
+    except ValueError as e:
+        logger.error(f"Validation error in process_scan: {e}")
+        return JsonResponse({'error': str(e)}, status=400)
+    except RuntimeError as e:
+        logger.error(f"Runtime error in process_scan: {e}")
+        return JsonResponse({'error': str(e)}, status=503)
+    except Exception as e:
+        logger.exception(f"Unexpected error in process_scan: {e}")
+        return JsonResponse({'error': f'Processing failed: {str(e)}'}, status=500)
+
+
+# ---------------------------------------------------------------------------
+# Recommendations page
+# ---------------------------------------------------------------------------
 
 def recommendations(request, session_id):
-    """Display results and recommendations"""
+    """Display AI results and matching store products."""
     body_scan = get_object_or_404(BodyScan, session_id=session_id)
-    recommendations_list = body_scan.recommendations.all()
-    
-    # Get gender filter from query parameter
+
+    # Retrieve the LLM-recommended size from the first Recommendation record
+    first_rec = body_scan.recommendations.first()
+    recommended_size = first_rec.recommended_size if first_rec else 'M'
+
+    # Gender filter
     gender = request.GET.get('gender', None)
     if gender and gender not in ['men', 'women']:
         gender = None
-    
-    # Get recommended colors based on skin tone + undertone
-    rec_engine = RecommendationEngine()
-    undertone = getattr(body_scan, 'undertone', 'warm')  # Default to warm for backward compatibility
-    recommended_colors = rec_engine.recommend_colors(body_scan.skin_tone, undertone)
-    
-    # Get actual matching products with size + color from store (with optional gender filter)
-    matching_products = rec_engine.get_matching_product_variants(body_scan, gender=gender, limit=12)
-    
-    # Calculate recommended size and fit directly from measurements
-    measurements = {
-        'height': float(body_scan.height),
-        'chest': float(body_scan.chest),
-        'waist': float(body_scan.waist),
-        'shoulder_width': float(body_scan.shoulder_width)
-    }
-    recommended_size = rec_engine.recommend_size(measurements)
-    recommended_fit = rec_engine.recommend_fit(measurements)
-    
+
+    # Match products whose variants have the recommended size in stock
+    matching_products = _get_matching_products(recommended_size, gender, limit=12)
+
     context = {
-        'body_scan': body_scan,
-        'recommendations': recommendations_list,
-        'matching_products': matching_products,  # Actual products with size+color
-        'recommended_colors': recommended_colors[:5],
-        'recommended_size': recommended_size,  # Calculated directly
-        'recommended_fit': recommended_fit,    # Calculated directly
+        'body_scan':         body_scan,
+        'recommended_size':  recommended_size,
         'skin_tone_display': body_scan.skin_tone.replace('_', ' ').title(),
-        'undertone_display': undertone.title(),
-        'selected_gender': gender,  # Pass current gender filter to template
+        'undertone_display': body_scan.undertone.title(),
+        'matching_products': matching_products,
+        'selected_gender':   gender,
     }
-    
     return render(request, 'recommendations.html', context)
 
 
+def _get_matching_products(recommended_size: str, gender=None, limit=12):
+    """
+    Return products that have the recommended size in stock.
+    Each item in the list is a dict with product + variant info.
+    """
+    if gender and gender in ['men', 'women']:
+        products = Product.objects.filter(Q(gender=gender) | Q(gender='unisex'))
+    else:
+        products = Product.objects.all()
+
+    results = []
+    for product in products:
+        variant = ProductVariant.objects.filter(
+            product=product,
+            size__name=recommended_size,
+            inventory__quantity__gt=0,
+        ).select_related('size', 'color', 'product').first()
+
+        if variant:
+            results.append({
+                'product':          product,
+                'variant':          variant,
+                'recommended_size': recommended_size,
+                'color_name':       variant.color.name,
+                'color_hex':        variant.color.hex_code,
+            })
+
+    return results[:limit]
+
+
+# ---------------------------------------------------------------------------
+# Store & inventory views (unchanged)
+# ---------------------------------------------------------------------------
 
 def inventory_dashboard(request):
     """Inventory management dashboard"""
-    # Get all product variants with inventory
     variants = ProductVariant.objects.select_related(
         'product', 'size', 'color', 'inventory'
     ).all()
-    
-    # Separate by stock status
-    in_stock = []
-    low_stock = []
-    out_of_stock = []
-    
+
+    in_stock, low_stock, out_of_stock = [], [], []
+
     for variant in variants:
         try:
             if variant.inventory.is_out_of_stock:
@@ -320,28 +275,24 @@ def inventory_dashboard(request):
                 in_stock.append(variant)
         except Inventory.DoesNotExist:
             out_of_stock.append(variant)
-    
+
     context = {
-        'in_stock': in_stock,
-        'low_stock': low_stock,
-        'out_of_stock': out_of_stock,
+        'in_stock':       in_stock,
+        'low_stock':      low_stock,
+        'out_of_stock':   out_of_stock,
         'total_variants': variants.count(),
     }
-    
     return render(request, 'inventory.html', context)
 
 
 def store(request):
     """Online store product catalog"""
-    # Get filter parameters
     category = request.GET.get('category', '')
-    gender = request.GET.get('gender', '')
-    search = request.GET.get('search', '')
-    
-    # Base query
+    gender   = request.GET.get('gender', '')
+    search   = request.GET.get('search', '')
+
     products = Product.objects.all()
-    
-    # Apply filters
+
     if category:
         products = products.filter(category=category)
     if gender:
@@ -350,34 +301,29 @@ def store(request):
         products = products.filter(
             Q(name__icontains=search) | Q(description__icontains=search)
         )
-    
-    # Get unique categories and genders for filters (remove duplicates)
+
     categories = Product.objects.values_list('category', flat=True).distinct().order_by('category')
-    genders = Product.objects.values_list('gender', flat=True).distinct().order_by('gender')
-    
+    genders    = Product.objects.values_list('gender', flat=True).distinct().order_by('gender')
+
     context = {
-        'products': products,
-        'categories': categories,
-        'genders': genders,
+        'products':         products,
+        'categories':       categories,
+        'genders':          genders,
         'selected_category': category,
-        'selected_gender': gender,
-        'search_query': search,
+        'selected_gender':  gender,
+        'search_query':     search,
     }
-    
     return render(request, 'store.html', context)
 
 
 def product_detail(request, product_id):
     """Product detail page"""
-    product = get_object_or_404(Product, id=product_id)
-    
-    # Get all variants for this product
+    product  = get_object_or_404(Product, id=product_id)
     variants = product.variants.select_related('size', 'color', 'inventory').all()
-    
-    # Get available sizes and colors
-    available_sizes = set()
+
+    available_sizes  = set()
     available_colors = set()
-    
+
     for variant in variants:
         try:
             if variant.inventory.is_available:
@@ -385,20 +331,18 @@ def product_detail(request, product_id):
                 available_colors.add(variant.color)
         except Inventory.DoesNotExist:
             pass
-    
-    # Get related products (same category, different product)
+
     related_products = Product.objects.filter(
         category=product.category
     ).exclude(id=product.id)[:4]
-    
+
     context = {
-        'product': product,
-        'variants': variants,
-        'available_sizes': sorted(available_sizes, key=lambda x: x.id),
+        'product':          product,
+        'variants':         variants,
+        'available_sizes':  sorted(available_sizes, key=lambda x: x.id),
         'available_colors': sorted(available_colors, key=lambda x: x.name),
         'related_products': related_products,
     }
-    
     return render(request, 'product_detail.html', context)
 
 
@@ -407,55 +351,29 @@ def api_inventory(request):
     variants = ProductVariant.objects.select_related(
         'product', 'size', 'color', 'inventory'
     ).all()
-    
+
     data = []
     for variant in variants:
         try:
             inv = variant.inventory
             data.append({
-                'id': variant.id,
-                'product': variant.product.name,
-                'size': variant.size.name,
-                'color': variant.color.name,
-                'quantity': inv.quantity,
-                'is_low_stock': inv.is_low_stock,
+                'id':            variant.id,
+                'product':       variant.product.name,
+                'size':          variant.size.name,
+                'color':         variant.color.name,
+                'quantity':      inv.quantity,
+                'is_low_stock':  inv.is_low_stock,
                 'is_out_of_stock': inv.is_out_of_stock,
             })
         except Inventory.DoesNotExist:
             data.append({
-                'id': variant.id,
-                'product': variant.product.name,
-                'size': variant.size.name,
-                'color': variant.color.name,
-                'quantity': 0,
-                'is_low_stock': False,
+                'id':            variant.id,
+                'product':       variant.product.name,
+                'size':          variant.size.name,
+                'color':         variant.color.name,
+                'quantity':      0,
+                'is_low_stock':  False,
                 'is_out_of_stock': True,
             })
-    
+
     return JsonResponse({'inventory': data})
-
-
-# Helper functions
-
-def decode_base64_image(base64_string):
-    """Decode base64 image to numpy array"""
-    # Remove data URL prefix if present
-    if ',' in base64_string:
-        base64_string = base64_string.split(',')[1]
-    
-    # Decode base64
-    image_data = base64.b64decode(base64_string)
-    
-    # Convert to PIL Image
-    pil_image = Image.open(BytesIO(image_data))
-    
-    # Convert to numpy array (RGB)
-    image_array = np.array(pil_image)
-    
-    # Convert RGB to BGR for OpenCV
-    if len(image_array.shape) == 3 and image_array.shape[2] == 3:
-        image_bgr = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
-    else:
-        image_bgr = image_array
-    
-    return image_bgr
