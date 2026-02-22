@@ -1,92 +1,97 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Virtual Fitting System{% endblock %}</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Custom Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#6366f1',
-                        secondary: '#8b5cf6',
-                        accent: '#ec4899',
+                        primary: '#1B3A6B',
+                        secondary: '#2E5FA3',
+                        accent: '#5B8FC9',
+                        surface: '#7DB8D8',
+                        background: '#EAF3F8',
                     }
                 }
             }
         }
     </script>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <style>
         * {
             scroll-behavior: smooth;
         }
-        
+
         body {
             font-family: 'Inter', sans-serif;
         }
-        
+
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1B3A6B 0%, #2E5FA3 50%, #5B8FC9 100%);
         }
-        
+
         /* Glassmorphism Effects */
         .glass-effect {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        
+
         .glass-filter {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(27, 58, 107, 0.08) 0%, rgba(46, 95, 163, 0.08) 100%);
             backdrop-filter: blur(16px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         /* Hover Effects */
         .hover-lift {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                        box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .hover-lift:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 25px 50px rgba(27, 58, 107, 0.25);
         }
-        
+
         .hover-glow {
             transition: all 0.3s ease;
             position: relative;
         }
-        
+
         .hover-glow:hover {
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5),
-                        0 0 60px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 30px rgba(91, 143, 201, 0.4),
+                0 0 60px rgba(46, 95, 163, 0.2);
         }
-        
+
         /* Gradient Overlays */
         .gradient-overlay {
             position: relative;
             overflow: hidden;
         }
-        
+
         .gradient-overlay::before {
             content: '';
             position: absolute;
@@ -94,113 +99,133 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(27, 58, 107, 0.08) 0%, rgba(91, 143, 201, 0.08) 100%);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        
+
         .gradient-overlay:hover::before {
             opacity: 1;
         }
-        
+
         /* Animations */
         .pulse-animation {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        
+
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 1;
             }
+
             50% {
                 opacity: .7;
             }
         }
-        
+
         .fade-in {
             animation: fadeIn 0.6s ease-out forwards;
         }
-        
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .slide-up {
             animation: slideUp 0.5s ease-out forwards;
         }
-        
+
         @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .scale-in {
             animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
-        
+
         @keyframes scaleIn {
             from {
                 opacity: 0;
                 transform: scale(0.9);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
             }
         }
-        
+
         /* Stagger animation delays */
-        .stagger-1 { animation-delay: 0.1s; }
-        .stagger-2 { animation-delay: 0.2s; }
-        .stagger-3 { animation-delay: 0.3s; }
-        .stagger-4 { animation-delay: 0.4s; }
-        
+        .stagger-1 {
+            animation-delay: 0.1s;
+        }
+
+        .stagger-2 {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-3 {
+            animation-delay: 0.3s;
+        }
+
+        .stagger-4 {
+            animation-delay: 0.4s;
+        }
+
         /* Image zoom effect */
         .image-zoom {
             overflow: hidden;
         }
-        
+
         .image-zoom img {
             transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .image-zoom:hover img {
             transform: scale(1.1);
         }
-        
+
         /* Floating badge */
         .floating-badge {
             animation: float 3s ease-in-out infinite;
         }
-        
+
         @keyframes float {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0px);
             }
+
             50% {
                 transform: translateY(-5px);
             }
         }
-        
+
         /* Shimmer effect */
         .shimmer {
             position: relative;
             overflow: hidden;
         }
-        
+
         .shimmer::after {
             content: '';
             position: absolute;
@@ -211,60 +236,70 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             animation: shimmer 2s infinite;
         }
-        
+
         @keyframes shimmer {
             0% {
                 left: -100%;
             }
+
             100% {
                 left: 100%;
             }
         }
     </style>
-    
+
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-50 min-h-screen">
+
+<body class="bg-[#EAF3F8] min-h-screen">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <a href="{% url 'fitting_system:index' %}" class="flex items-center space-x-2">
-                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-bold text-xl">VF</span>
-                        </div>
-                        <span class="text-xl font-bold text-gray-800">Virtual Fitting</span>
+                <div class="flex items-center" style="margin-left: -1rem;">
+                    <a href="{% url 'fitting_system:index' %}" class="flex items-center">
+                        <img src="{% static 'images/products/Gemini_Generated_Image_k8jh4tk8jh4tk8jh.png' %}"
+                            alt="HRT Logo" class="h-14 w-auto">
                     </a>
                 </div>
-                
+
                 <div class="hidden md:flex items-center space-x-6">
-                    <a href="{% url 'fitting_system:index' %}" class="text-gray-700 hover:text-indigo-600 font-medium transition">Home</a>
-                    <a href="{% url 'fitting_system:store' %}" class="text-gray-700 hover:text-indigo-600 font-medium transition">Store</a>
-                    <a href="{% url 'fitting_system:scan' %}" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition transform hover:scale-105">
+                    <a href="{% url 'fitting_system:index' %}"
+                        class="text-gray-700 hover:text-[#2E5FA3] font-medium transition">Home</a>
+                    <a href="{% url 'fitting_system:store' %}"
+                        class="text-gray-700 hover:text-[#2E5FA3] font-medium transition">Store</a>
+                    <a href="{% url 'fitting_system:scan' %}"
+                        class="bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] text-white px-6 py-2 rounded-lg hover:shadow-lg transition transform hover:scale-105">
                         Try Virtual Fitting
                     </a>
-                    <a href="{% url 'fitting_system:inventory' %}" class="text-gray-700 hover:text-indigo-600 font-medium transition">Inventory</a>
+                    <a href="{% url 'fitting_system:inventory' %}"
+                        class="text-gray-700 hover:text-[#2E5FA3] font-medium transition">Inventory</a>
                 </div>
-                
+
                 <!-- Mobile menu button -->
                 <div class="md:hidden">
-                    <button id="mobile-menu-button" class="text-gray-700 hover:text-indigo-600">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-[#2E5FA3]">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
                 </div>
             </div>
         </div>
-        
+
         <!-- Mobile menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
             <div class="px-4 py-3 space-y-2">
-                <a href="{% url 'fitting_system:index' %}" class="block text-gray-700 hover:text-indigo-600 font-medium py-2">Home</a>
-                <a href="{% url 'fitting_system:store' %}" class="block text-gray-700 hover:text-indigo-600 font-medium py-2">Store</a>
-                <a href="{% url 'fitting_system:scan' %}" class="block bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-2 rounded-lg text-center">Try Virtual Fitting</a>
-                <a href="{% url 'fitting_system:inventory' %}" class="block text-gray-700 hover:text-indigo-600 font-medium py-2">Inventory</a>
+                <a href="{% url 'fitting_system:index' %}"
+                    class="block text-gray-700 hover:text-[#2E5FA3] font-medium py-2">Home</a>
+                <a href="{% url 'fitting_system:store' %}"
+                    class="block text-gray-700 hover:text-[#2E5FA3] font-medium py-2">Store</a>
+                <a href="{% url 'fitting_system:scan' %}"
+                    class="block bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] text-white px-6 py-2 rounded-lg text-center">Try
+                    Virtual Fitting</a>
+                <a href="{% url 'fitting_system:inventory' %}"
+                    class="block text-gray-700 hover:text-[#2E5FA3] font-medium py-2">Inventory</a>
             </div>
         </div>
     </nav>
@@ -275,25 +310,28 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white mt-20">
+    <footer class="bg-[#1B3A6B] text-white mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
                     <h3 class="text-lg font-bold mb-4">Virtual Fitting System</h3>
-                    <p class="text-gray-400">AI-powered virtual fitting for the perfect size and style.</p>
+                    <p class="text-[#7DB8D8]">AI-powered virtual fitting for the perfect size and style.</p>
                 </div>
                 <div>
                     <h3 class="text-lg font-bold mb-4">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'fitting_system:index' %}" class="text-gray-400 hover:text-white transition">Home</a></li>
-                        <li><a href="{% url 'fitting_system:store' %}" class="text-gray-400 hover:text-white transition">Store</a></li>
-                        <li><a href="{% url 'fitting_system:scan' %}" class="text-gray-400 hover:text-white transition">Virtual Fitting</a></li>
+                        <li><a href="{% url 'fitting_system:index' %}"
+                                class="text-[#7DB8D8] hover:text-white transition">Home</a></li>
+                        <li><a href="{% url 'fitting_system:store' %}"
+                                class="text-[#7DB8D8] hover:text-white transition">Store</a></li>
+                        <li><a href="{% url 'fitting_system:scan' %}"
+                                class="text-[#7DB8D8] hover:text-white transition">Virtual Fitting</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-lg font-bold mb-4">Contact</h3>
-                    <p class="text-gray-400">In-store system prototype</p>
-                    <p class="text-gray-400 mt-2">© 2026 Virtual Fitting System</p>
+                    <p class="text-[#7DB8D8]">In-store system prototype</p>
+                    <p class="text-[#7DB8D8] mt-2">© 2026 Virtual Fitting System</p>
                 </div>
             </div>
         </div>
@@ -301,7 +339,7 @@
 
     <!-- Mobile menu toggle script -->
     <script>
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        document.getElementById('mobile-menu-button').addEventListener('click', function () {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
         });
@@ -309,4 +347,5 @@
 
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>
