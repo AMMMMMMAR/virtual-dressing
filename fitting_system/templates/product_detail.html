@@ -7,11 +7,11 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-sm mb-8 fade-in">
-        <a href="{% url 'fitting_system:index' %}" class="text-gray-500 hover:text-indigo-600 transition">Home</a>
+        <a href="{% url 'fitting_system:index' %}" class="text-gray-500 hover:text-[#2E5FA3] transition">Home</a>
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
-        <a href="{% url 'fitting_system:store' %}" class="text-gray-500 hover:text-indigo-600 transition">Store</a>
+        <a href="{% url 'fitting_system:store' %}" class="text-gray-500 hover:text-[#2E5FA3] transition">Store</a>
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
         </svg>
@@ -25,7 +25,7 @@
                 class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl overflow-hidden shadow-2xl relative group image-zoom">
                 <!-- Gradient overlay on hover -->
                 <div
-                    class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
+                    class="absolute inset-0 bg-gradient-to-br from-[#1B3A6B]/10 via-[#2E5FA3]/10 to-[#5B8FC9]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
                 </div>
 
                 <!-- Dynamic product image based on category -->
@@ -56,7 +56,7 @@
                 <div class="absolute top-6 right-6 z-20">
                     <div class="glass-card px-4 py-2 rounded-full shadow-xl">
                         <span
-                            class="text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            class="text-sm font-bold bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] bg-clip-text text-transparent">
                             Premium Quality
                         </span>
                     </div>
@@ -69,22 +69,22 @@
             <div class="mb-6">
                 <div class="flex items-center gap-2 mb-4">
                     <span
-                        class="px-4 py-2 bg-gradient-to-r from-indigo-100 to-indigo-50 text-indigo-800 rounded-full text-sm font-semibold border border-indigo-200">
+                        class="px-4 py-2 bg-[#EAF3F8] text-[#1B3A6B] rounded-full text-sm font-semibold border border-[#7DB8D8]">
                         {{ product.category|title }}
                     </span>
                     <span
-                        class="px-4 py-2 bg-gradient-to-r from-purple-100 to-purple-50 text-purple-800 rounded-full text-sm font-semibold border border-purple-200">
+                        class="px-4 py-2 bg-[#EAF3F8] text-[#2E5FA3] rounded-full text-sm font-semibold border border-[#7DB8D8]">
                         {{ product.gender|title }}
                     </span>
                     <span
-                        class="px-4 py-2 bg-gradient-to-r from-pink-100 to-pink-50 text-pink-800 rounded-full text-sm font-semibold border border-pink-200">
+                        class="px-4 py-2 bg-[#EAF3F8] text-[#5B8FC9] rounded-full text-sm font-semibold border border-[#7DB8D8]">
                         {{ product.fit_type|title }} Fit
                     </span>
                 </div>
                 <h1 class="text-5xl font-extrabold text-gray-900 mb-6 leading-tight">{{ product.name }}</h1>
                 <div class="flex items-baseline gap-3 mb-6">
                     <span
-                        class="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        class="text-5xl font-extrabold bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] bg-clip-text text-transparent">
                         ${{ product.price }}
                     </span>
                     <span class="text-gray-500 line-through text-xl">${{ product.price|add:20 }}</span>
@@ -96,7 +96,7 @@
             <!-- Available Sizes -->
             <div class="mb-8">
                 <h3 class="font-bold text-xl text-gray-900 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-2 text-[#1B3A6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
@@ -105,7 +105,7 @@
                 <div class="flex flex-wrap gap-3">
                     {% for size in available_sizes %}
                     <button
-                        class="group px-6 py-3 border-2 border-indigo-300 text-indigo-700 rounded-xl font-bold hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 hover:text-white hover:border-transparent transition transform hover:scale-105 hover:shadow-lg">
+                        class="group px-6 py-3 border-2 border-[#5B8FC9] text-[#1B3A6B] rounded-xl font-bold hover:bg-gradient-to-r hover:from-[#1B3A6B] hover:to-[#2E5FA3] hover:text-white hover:border-transparent transition transform hover:scale-105 hover:shadow-lg">
                         {{ size.name }}
                     </button>
                     {% empty %}
@@ -117,7 +117,7 @@
             <!-- Available Colors -->
             <div class="mb-10">
                 <h3 class="font-bold text-xl text-gray-900 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-2 text-[#2E5FA3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01">
                         </path>
@@ -127,10 +127,11 @@
                 <div class="flex flex-wrap gap-3">
                     {% for color in available_colors %}
                     <button
-                        class="group flex items-center gap-3 px-5 py-3 border-2 border-gray-200 rounded-xl hover:border-indigo-500 transition transform hover:scale-105 hover:shadow-lg bg-white">
-                        <div class="w-8 h-8 rounded-full border-3 border-white shadow-md ring-2 ring-gray-200 group-hover:ring-indigo-500 transition"
+                        class="group flex items-center gap-3 px-5 py-3 border-2 border-gray-200 rounded-xl hover:border-[#5B8FC9] transition transform hover:scale-105 hover:shadow-lg bg-white">
+                        <div class="w-8 h-8 rounded-full border-3 border-white shadow-md ring-2 ring-gray-200 group-hover:ring-[#5B8FC9] transition"
                             style="background-color: {{ color.hex_code }};"></div>
-                        <span class="font-semibold text-gray-900 group-hover:text-indigo-600 transition">{{ color.name }}</span>
+                        <span class="font-semibold text-gray-900 group-hover:text-[#2E5FA3] transition">{{ color.name
+                            }}</span>
                     </button>
                     {% empty %}
                     <p class="text-gray-500 italic">No colors currently available</p>
@@ -141,9 +142,9 @@
             <!-- Actions -->
             <div class="space-y-4">
                 <a href="{% url 'fitting_system:scan' %}"
-                    class="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105 relative overflow-hidden group">
+                    class="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-[#1B3A6B] via-[#2E5FA3] to-[#5B8FC9] text-white py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105 relative overflow-hidden group">
                     <div
-                        class="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        class="absolute inset-0 bg-gradient-to-r from-[#5B8FC9] via-[#2E5FA3] to-[#1B3A6B] opacity-0 group-hover:opacity-100 transition-opacity">
                     </div>
                     <svg class="w-7 h-7 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -169,7 +170,7 @@
                 <div class="glass-card p-4 rounded-xl">
                     <div class="flex items-center gap-3">
                         <div
-                            class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            class="w-10 h-10 bg-gradient-to-br from-[#1B3A6B] to-[#2E5FA3] rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 13l4 4L19 7"></path>
@@ -184,7 +185,7 @@
                 <div class="glass-card p-4 rounded-xl">
                     <div class="flex items-center gap-3">
                         <div
-                            class="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center">
+                            class="w-10 h-10 bg-gradient-to-br from-[#2E5FA3] to-[#5B8FC9] rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -205,7 +206,7 @@
     {% if related_products %}
     <div class="mt-24">
         <h2 class="text-4xl font-extrabold text-gray-900 mb-10 text-center">
-            <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span class="bg-gradient-to-r from-[#1B3A6B] via-[#2E5FA3] to-[#5B8FC9] bg-clip-text text-transparent">
                 You May Also Like
             </span>
         </h2>
@@ -216,19 +217,20 @@
                 <div
                     class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden image-zoom">
                     <div
-                        class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        class="absolute inset-0 bg-gradient-to-br from-[#1B3A6B]/10 via-[#2E5FA3]/10 to-[#5B8FC9]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     </div>
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='gradRel{{ forloop.counter }}' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:0.1' /%3E%3Cstop offset='100%25' style='stop-color:%238b5cf6;stop-opacity:0.1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23gradRel{{ forloop.counter }})'/%3E%3Ccircle cx='200' cy='200' r='80' fill='%236366f1' opacity='0.3'/%3E%3C/svg%3E"
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='gradRel{{ forloop.counter }}' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%231B3A6B;stop-opacity:0.1' /%3E%3Cstop offset='100%25' style='stop-color:%232E5FA3;stop-opacity:0.1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23gradRel{{ forloop.counter }})'/%3E%3Ccircle cx='200' cy='200' r='80' fill='%231B3A6B' opacity='0.3'/%3E%3C/svg%3E"
                         alt="{{ rel_product.name }}" class="w-full h-full object-cover">
                 </div>
                 <div class="p-5">
-                    <h3 class="font-bold text-lg text-gray-900 mb-2 group-hover:text-indigo-600 transition">{{ rel_product.name }}</h3>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2 group-hover:text-[#2E5FA3] transition">{{
+                        rel_product.name }}</h3>
                     <p
-                        class="text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+                        class="text-2xl font-extrabold bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] bg-clip-text text-transparent mb-4">
                         ${{ rel_product.price }}
                     </p>
                     <a href="{% url 'fitting_system:product_detail' rel_product.id %}"
-                        class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-3 rounded-xl font-bold hover:shadow-xl transition transform hover:scale-105">
+                        class="block w-full bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] text-white text-center py-3 rounded-xl font-bold hover:shadow-xl transition transform hover:scale-105">
                         View Details
                     </a>
                 </div>

@@ -8,7 +8,7 @@
     <!-- Header -->
     <div class="text-center mb-12 fade-in">
         <h1
-            class="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+            class="text-5xl font-extrabold bg-gradient-to-r from-[#1B3A6B] via-[#2E5FA3] to-[#5B8FC9] bg-clip-text text-transparent mb-4">
             Discover Your Style
         </h1>
         <p class="text-xl text-gray-600">Explore our curated collection of premium clothing</p>
@@ -19,18 +19,18 @@
         <form method="get" class="flex flex-wrap gap-4">
             <div class="flex-1 min-w-[200px]">
                 <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2 text-[#1B3A6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                     Search
                 </label>
                 <input type="text" name="search" value="{{ search_query }}" placeholder="Search for products..."
-                    class="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-white/80 backdrop-blur-sm">
+                    class="w-full px-4 py-3 border-2 border-[#7DB8D8] rounded-xl focus:ring-2 focus:ring-[#5B8FC9] focus:border-[#5B8FC9] transition bg-white/80 backdrop-blur-sm">
             </div>
             <div class="flex-1 min-w-[150px]">
                 <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2 text-[#2E5FA3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
                         </path>
@@ -38,7 +38,7 @@
                     Category
                 </label>
                 <select name="category"
-                    class="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 transition bg-white/80 backdrop-blur-sm">
+                    class="w-full px-4 py-3 border-2 border-[#7DB8D8] rounded-xl focus:ring-2 focus:ring-[#5B8FC9] transition bg-white/80 backdrop-blur-sm">
                     <option value="">All Categories</option>
                     {% for cat in categories %}
                     <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat|title }}
@@ -48,14 +48,14 @@
             </div>
             <div class="flex-1 min-w-[150px]">
                 <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <svg class="w-4 h-4 mr-2 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 mr-2 text-[#5B8FC9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                     Gender
                 </label>
                 <select name="gender"
-                    class="w-full px-4 py-3 border-2 border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-500 transition bg-white/80 backdrop-blur-sm">
+                    class="w-full px-4 py-3 border-2 border-[#7DB8D8] rounded-xl focus:ring-2 focus:ring-[#5B8FC9] transition bg-white/80 backdrop-blur-sm">
                     <option value="">All</option>
                     {% for gen in genders %}
                     <option value="{{ gen }}" {% if gen == selected_gender %}selected{% endif %}>{{ gen|title }}</option>
@@ -64,7 +64,7 @@
             </div>
             <div class="flex items-end">
                 <button type="submit"
-                    class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:shadow-2xl hover:scale-105 transition transform flex items-center gap-2">
+                    class="bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] text-white px-8 py-3 rounded-xl font-bold hover:shadow-2xl hover:scale-105 transition transform flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
@@ -85,7 +85,7 @@
             <!-- Product Image with Gradient Overlay -->
             <div class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden image-zoom">
                 <div
-                    class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
+                    class="absolute inset-0 bg-gradient-to-br from-[#1B3A6B]/10 via-[#2E5FA3]/10 to-[#5B8FC9]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
                 </div>
 
                 <!-- Dynamic product image based on category -->
@@ -115,7 +115,7 @@
                 <!-- Floating Badge -->
                 <div class="absolute top-4 right-4 z-20">
                     <span
-                        class="px-3 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold rounded-full shadow-lg floating-badge">
+                        class="px-3 py-1 bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] text-white text-xs font-bold rounded-full shadow-lg floating-badge">
                         {{ product.fit_type|title }}
                     </span>
                 </div>
@@ -124,14 +124,15 @@
             <!-- Product Info -->
             <div class="p-6 relative">
                 <div class="flex items-start justify-between mb-3">
-                    <h3 class="font-bold text-xl text-gray-900 group-hover:text-indigo-600 transition">{{ product.name }}</h3>
+                    <h3 class="font-bold text-xl text-gray-900 group-hover:text-[#2E5FA3] transition">{{ product.name }}
+                    </h3>
                 </div>
                 <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ product.description|truncatewords:12 }}</p>
 
                 <div class="flex items-center justify-between mb-5">
                     <div>
                         <span
-                            class="text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            class="text-3xl font-extrabold bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] bg-clip-text text-transparent">
                             ${{ product.price }}
                         </span>
                     </div>
@@ -139,17 +140,17 @@
                         <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
                             {{ product.gender|title }}
                         </span>
-                        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full">
+                        <span class="px-3 py-1 bg-[#EAF3F8] text-[#1B3A6B] text-xs font-medium rounded-full">
                             {{ product.category|title }}
                         </span>
                     </div>
                 </div>
 
                 <a href="{% url 'fitting_system:product_detail' product.id %}"
-                    class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-3 rounded-xl font-bold hover:shadow-xl transition transform hover:scale-105 relative overflow-hidden group/btn">
+                    class="block w-full bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] text-white text-center py-3 rounded-xl font-bold hover:shadow-xl transition transform hover:scale-105 relative overflow-hidden group/btn">
                     <span class="relative z-10">View Details</span>
                     <div
-                        class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover/btn:opacity-100 transition-opacity">
+                        class="absolute inset-0 bg-gradient-to-r from-[#2E5FA3] to-[#5B8FC9] opacity-0 group-hover/btn:opacity-100 transition-opacity">
                     </div>
                 </a>
             </div>
@@ -159,8 +160,8 @@
     {% else %}
     <!-- Empty State -->
     <div class="text-center py-20 fade-in">
-        <div class="inline-block p-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl mb-6">
-            <svg class="w-24 h-24 text-indigo-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="inline-block p-8 bg-gradient-to-br from-[#EAF3F8] to-white rounded-3xl mb-6">
+            <svg class="w-24 h-24 text-[#5B8FC9] mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
                 </path>
@@ -169,7 +170,7 @@
         <h3 class="text-3xl font-bold text-gray-900 mb-3">No Products Found</h3>
         <p class="text-xl text-gray-600 mb-6">Try adjusting your filters or search query.</p>
         <a href="{% url 'fitting_system:store' %}"
-            class="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:shadow-xl transition transform hover:scale-105">
+            class="inline-block bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] text-white px-8 py-3 rounded-xl font-bold hover:shadow-xl transition transform hover:scale-105">
             Clear Filters
         </a>
     </div>
@@ -177,7 +178,7 @@
 
     <!-- CTA Banner -->
     <div class="mt-20 relative overflow-hidden rounded-3xl shadow-2xl">
-        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#1B3A6B] via-[#2E5FA3] to-[#5B8FC9]"></div>
         <div class="absolute inset-0 opacity-20">
             <div
                 class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2">
@@ -192,7 +193,7 @@
                 Try our AI-powered virtual fitting system for personalized size recommendations and perfect fit!
             </p>
             <a href="{% url 'fitting_system:scan' %}"
-                class="inline-flex items-center gap-3 bg-white text-indigo-600 px-10 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105">
+                class="inline-flex items-center gap-3 bg-white text-[#1B3A6B] px-10 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">

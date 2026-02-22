@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -130,6 +135,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Gemini AI Configuration
 # Set your API key here or via environment variable GEMINI_API_KEY
-import os
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyAJlOjf0gjHVp64nSANOYIDtDyXBnQrVCo')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyCFzLus0YkXmZbsG_VA3HKih7Ap2pmBTis')
 
