@@ -372,6 +372,51 @@ def _get_matching_products(recommended_size: str, gender=None, limit=12):
 
 
 # ---------------------------------------------------------------------------
+# Avatar page (3D avatar viewer with skin tone & color recommendations)
+# ---------------------------------------------------------------------------
+
+# Map BodyScan skin_tone values → avatar swatch index & hex
+SKIN_TONE_MAP = {
+    'very_light':   {'index': 0, 'hex': 'fde8d0', 'label': 'Porcelain'},
+    'light':        {'index': 1, 'hex': 'f5cba7', 'label': 'Ivory'},
+    'intermediate': {'index': 2, 'hex': 'e8a87c', 'label': 'Peach'},
+    'tan':          {'index': 3, 'hex': 'c68642', 'label': 'Tan'},
+    'dark':         {'index': 4, 'hex': '8d5524', 'label': 'Brown'},
+}
+
+
+def avatar(request, session_id):
+    """3D avatar page with skin tone and color recommendations."""
+    body_scan = get_object_or_404(BodyScan, session_id=session_id)
+
+    # Retrieve recommended size
+    first_rec = body_scan.recommendations.first()
+    recommended_size = first_rec.recommended_size if first_rec else 'M'
+
+    # Determine gender: women scans use frame_count=0, men use frame_count>=1
+    # Also allow override via query param
+    gender = request.GET.get('gender', None)
+    if not gender:
+        gender = 'women' if body_scan.frame_count == 0 else 'men'
+
+    # Map skin tone to avatar swatch
+    skin_info = SKIN_TONE_MAP.get(body_scan.skin_tone, SKIN_TONE_MAP['intermediate'])
+
+    context = {
+        'body_scan':        body_scan,
+        'session_id':       str(session_id),
+        'recommended_size': recommended_size,
+        'gender':           gender,
+        'skin_tone_index':  skin_info['index'],
+        'skin_tone_hex':    skin_info['hex'],
+        'skin_tone_label':  skin_info['label'],
+        'skin_tone_display': body_scan.skin_tone.replace('_', ' ').title(),
+        'undertone_display': body_scan.undertone.title(),
+    }
+    return render(request, 'avatar.html', context)
+
+
+# ---------------------------------------------------------------------------
 # Store & inventory views (unchanged)
 # ---------------------------------------------------------------------------
 
