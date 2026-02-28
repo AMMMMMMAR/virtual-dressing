@@ -8,8 +8,7 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">{% trans "Virtual Body Scan" %}</h1>
-        <p id="scan-subtitle" class="text-xl text-gray-600">{% trans "Two images needed: full-body pose + face selfie"
-            %}</p>
+        <p id="scan-subtitle" class="text-xl text-gray-600">Two images needed: full-body pose + face selfie</p>
     </div>
 
     <!-- Gender Selector -->
@@ -62,10 +61,8 @@
                         </span>
                     </div>
                 </div>
-                <p id="height-error" class="hidden text-red-500 text-sm mt-2">{% trans "Please enter a valid height
-                    between 100 and 250 cm." %}</p>
-                <p class="text-gray-400 text-xs mt-2">{% trans "Your height is used to calibrate YOLO body measurements
-                    for accuracy." %}</p>
+                <p id="height-error" class="hidden text-red-500 text-sm mt-2">Please enter a valid height between 100 and 250 cm.</p>
+                <p class="text-gray-400 text-xs mt-2">Your height is used to calibrate YOLO body measurements for accuracy.</p>
             </div>
         </div>
 
@@ -186,8 +183,7 @@
                                     class="h-2 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-100"
                                     style="width: 0%"></div>
                             </div>
-                            <p class="text-center text-white text-sm mt-2 font-medium">{% trans "Auto-capturing when
-                                position is correct..." %}</p>
+                            <p class="text-center text-white text-sm mt-2 font-medium">Auto-capturing when position is correct...</p>
                         </div>
 
                         <!-- Loading spinner -->
@@ -198,8 +194,7 @@
                                     class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white mx-auto mb-4">
                                 </div>
                                 <p class="text-white text-lg">{% trans "Analysing with YOLO + AI..." %}</p>
-                                <p class="text-gray-300 text-sm mt-2">{% trans "Detecting pose, measuring body,
-                                    detecting skin tone..." %}</p>
+                                <p class="text-gray-300 text-sm mt-2">Detecting pose, measuring body, detecting skin tone...</p>
                             </div>
                         </div>
                     </div>
@@ -213,8 +208,7 @@
                         <li>✓ {% trans "Stand 2–3 metres away from the camera" %}</li>
                         <li>✓ {% trans "Align your full body with the guide outline" %}</li>
                         <li>✓ {% trans "Stand straight with arms slightly away from your body" %}</li>
-                        <li>⚡ <strong>{% trans "Image captures automatically when you're positioned correctly!"
-                                %}</strong></li>
+                        <li>⚡ <strong>Image captures automatically when you're positioned correctly!</strong></li>
                     </ul>
                 </div>
 
@@ -270,8 +264,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             {% trans "Body Pose" %} <span class="text-red-500">*</span>
-                            <span class="text-gray-400 font-normal">({% trans "required – full body, front view"
-                                %})</span>
+                            <span class="text-gray-400 font-normal">(required – full body, front view)</span>
                         </label>
                         <div id="front-dropzone"
                             class="relative border-2 border-dashed border-[#5B8FC9] rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:border-[#1B3A6B] hover:bg-[#EAF3F8]/50 group"
@@ -292,16 +285,14 @@
                                 </div>
                                 <p class="text-gray-600 font-medium">{% trans "Drop body photo here" %}</p>
                                 <p class="text-gray-400 text-sm mt-1">{% trans "or click to browse" %}</p>
-                                <p class="text-gray-400 text-xs mt-3">{% trans "Stand facing the camera, full body
-                                    visible" %}</p>
+                                <p class="text-gray-400 text-xs mt-3">Stand facing the camera, full body visible</p>
                             </div>
                             <div id="front-upload-preview" class="hidden">
                                 <img id="front-upload-img" class="max-h-64 mx-auto rounded-lg shadow-md"
                                     alt="{% trans 'Body pose' %}">
                                 <p class="text-green-600 font-medium mt-3">✓ {% trans "Body image ready" %}</p>
                                 <button type="button" onclick="event.stopPropagation(); removeUpload('front')"
-                                    class="mt-2 text-sm text-red-500 hover:text-red-700 underline">{% trans "Remove"
-                                    %}</button>
+                                    class="mt-2 text-sm text-red-500 hover:text-red-700 underline">Remove</button>
                             </div>
                         </div>
                     </div>
@@ -310,8 +301,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             {% trans "Face Selfie" %} <span class="text-red-500">*</span>
-                            <span class="text-gray-400 font-normal">({% trans "required – close-up face for skin tone"
-                                %})</span>
+                            <span class="text-gray-400 font-normal">(required – close-up face for skin tone)</span>
                         </label>
                         <div id="face-dropzone"
                             class="relative border-2 border-dashed border-amber-300 rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:border-amber-500 hover:bg-amber-50/50 group"
@@ -340,8 +330,7 @@
                                     alt="{% trans 'Face selfie' %}">
                                 <p class="text-amber-600 font-medium mt-3">✓ {% trans "Face image ready" %}</p>
                                 <button type="button" onclick="event.stopPropagation(); removeUpload('face')"
-                                    class="mt-2 text-sm text-red-500 hover:text-red-700 underline">{% trans "Remove"
-                                    %}</button>
+                                    class="mt-2 text-sm text-red-500 hover:text-red-700 underline">Remove</button>
                             </div>
                         </div>
                     </div>
@@ -370,8 +359,7 @@
                             class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#5B8FC9] mx-auto mb-4">
                         </div>
                         <p class="text-white text-lg font-medium">{% trans "Analysing with YOLO + AI..." %}</p>
-                        <p class="text-gray-400 text-sm mt-2">{% trans "Detecting pose, measuring body, detecting skin
-                            tone..." %}</p>
+                                <p class="text-gray-300 text-sm mt-2">Detecting pose, measuring body, detecting skin tone...</p>
                     </div>
                 </div>
 
@@ -392,8 +380,7 @@
         <div class="bg-white rounded-2xl shadow-xl p-8">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">{% trans "Enter Your Measurements" %}</h2>
-                <p class="text-gray-500">{% trans "Enter your body measurements and upload a hand photo for skin tone"
-                    %}</p>
+                <p class="text-gray-500">Enter your body measurements and upload a hand photo for skin tone</p>
             </div>
 
             <!-- Required Measurements -->
@@ -491,8 +478,7 @@
                         </div>
                         <p class="text-gray-600 font-medium">{% trans "Drop hand photo here" %}</p>
                         <p class="text-gray-400 text-sm mt-1">{% trans "or click to browse" %}</p>
-                        <p class="text-gray-400 text-xs mt-3">{% trans "Photo of the back of your hand, good lighting,
-                            no filters" %}</p>
+                        <p class="text-gray-400 text-xs mt-3">Photo of the back of your hand, good lighting, no filters</p>
                     </div>
                     <div id="hand-upload-preview" class="hidden">
                         <img id="hand-upload-img" class="max-h-64 mx-auto rounded-lg shadow-md" alt="Hand photo">
