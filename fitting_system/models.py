@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils import timezone
 import uuid
+from .storage import ProductImageStorage
+
+
+product_image_storage = ProductImageStorage()
 
 
 class Size(models.Model):
@@ -71,7 +75,12 @@ class Product(models.Model):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
-    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to='images/products/',
+        storage=product_image_storage,
+        blank=True,
+        null=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
