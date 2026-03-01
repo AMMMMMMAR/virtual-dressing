@@ -170,6 +170,8 @@ class BodyScan(models.Model):
     # Measurement quality metrics
     confidence_score = models.DecimalField(max_digits=3, decimal_places=2, default=1.0)  # 0.0-1.0
     frame_count = models.IntegerField(default=1)  # Number of frames used for averaging
+    is_fallback = models.BooleanField(default=False)
+    error_message = models.TextField(null=True, blank=True)
     
     scanned_at = models.DateTimeField(auto_now_add=True)
     
