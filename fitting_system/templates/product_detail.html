@@ -77,14 +77,6 @@
                         class="px-4 py-2 bg-[#EAF3F8] text-[#1B3A6B] rounded-full text-sm font-semibold border border-[#7DB8D8]">
                         {{ product.category|title }}
                     </span>
-                    <span
-                        class="px-4 py-2 bg-[#EAF3F8] text-[#2E5FA3] rounded-full text-sm font-semibold border border-[#7DB8D8]">
-                        {{ product.gender|title }}
-                    </span>
-                    <span
-                        class="px-4 py-2 bg-[#EAF3F8] text-[#5B8FC9] rounded-full text-sm font-semibold border border-[#7DB8D8]">
-                        {{ product.fit_type|title }} {% trans "Fit" %}
-                    </span>
                 </div>
                 <h1 class="text-5xl font-extrabold text-gray-900 mb-6 leading-tight">{{ product.name }}</h1>
                 <div class="flex items-baseline gap-3 mb-6">
@@ -120,30 +112,7 @@
                 </div>
             </div>
 
-            <!-- Available Colors -->
-            <div class="mb-10">
-                <h3 class="font-bold text-xl text-gray-900 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-[#2E5FA3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01">
-                        </path>
-                    </svg>
-                    {% trans "Available Colors" %}
-                </h3>
-                <div class="flex flex-wrap gap-3">
-                    {% for color in available_colors %}
-                    <button
-                        class="group flex items-center gap-3 px-5 py-3 border-2 border-gray-200 rounded-xl hover:border-[#5B8FC9] transition transform hover:scale-105 hover:shadow-lg bg-white">
-                        <div class="w-8 h-8 rounded-full border-3 border-white shadow-md ring-2 ring-gray-200 group-hover:ring-[#5B8FC9] transition"
-                            style="background-color: {{ color.hex_code }};"></div>
-                        <span class="font-semibold text-gray-900 group-hover:text-[#2E5FA3] transition">{{ color.name
-                            }}</span>
-                    </button>
-                    {% empty %}
-                    <p class="text-gray-500 italic">{% trans "No colors currently available" %}</p>
-                    {% endfor %}
-                </div>
-            </div>
+
 
             <!-- Actions -->
             <div class="space-y-4">

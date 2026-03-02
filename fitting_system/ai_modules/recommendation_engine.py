@@ -80,8 +80,7 @@ class RecommendationEngine:
             garment_type=garment_type,
             body_shape=body_shape,
         )
-        fit = result.get("fit_type", "regular")
-        return fit if fit in ["slim", "regular", "oversize"] else "regular"
+        return "regular"
 
     # ── Colours (NEW: returns dict with shirt + pants) ────────────
     def recommend_colors(self, skin_tone: str, undertone: str = 'warm') -> Dict[str, str]:
@@ -133,7 +132,7 @@ class RecommendationEngine:
         color_rec = self.recommend_colors(body_scan.skin_tone, undertone)
         rec_shirt_name = color_rec['recommended_shirt']
         rec_pants_name = color_rec['recommended_pants']
-        recommended_fit = self.recommend_fit(measurements, body_shape=body_shape)
+        recommended_fit = 'regular'  # fit_type field removed
 
         # Map colour names → Color objects
         rec_shirt_color = Color.objects.filter(name=rec_shirt_name).first()
@@ -161,7 +160,7 @@ class RecommendationEngine:
             target_color = rec_shirt_color if is_top else rec_pants_color
             target_color_name = rec_shirt_name if is_top else rec_pants_name
 
-            fit_matches = product.fit_type == recommended_fit
+            fit_matches = True  # fit_type field removed
 
             # Priority 1: Exact size + recommended colour + in stock
             if target_color:
@@ -179,7 +178,7 @@ class RecommendationEngine:
                         'recommended_size': rec_size,
                         'recommended_color': variant.color.name,
                         'color_hex': variant.color.hex_code,
-                        'fit_type': product.fit_type,
+
                         'is_perfect_match': True,
                         'fit_matches_recommendation': fit_matches,
                         'recommended_fit': recommended_fit,
@@ -201,7 +200,7 @@ class RecommendationEngine:
                     'recommended_size': rec_size,
                     'recommended_color': fallback_variant.color.name,
                     'color_hex': fallback_variant.color.hex_code,
-                    'fit_type': product.fit_type,
+
                     'is_perfect_match': False,
                     'fit_matches_recommendation': fit_matches,
                     'recommended_fit': recommended_fit,
@@ -305,8 +304,7 @@ class RecommendationEngine:
 
             priority = 5  # base
 
-            if product.fit_type == recommended_fit:
-                priority += 15
+
 
             if available.filter(size__name=recommended_size).exists():
                 priority += 10

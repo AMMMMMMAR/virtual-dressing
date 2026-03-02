@@ -17,8 +17,8 @@ class ColorAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'fit_type', 'gender', 'price', 'created_at']
-    list_filter = ['category', 'fit_type', 'gender']
+    list_display = ['name', 'category', 'gender', 'price', 'created_at']
+    list_filter = ['category', 'gender']
     search_fields = ['name', 'description']
     ordering = ['name']
 

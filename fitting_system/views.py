@@ -530,13 +530,11 @@ def product_detail(request, product_id):
     variants = product.variants.select_related('size', 'color', 'inventory').all()
 
     available_sizes  = set()
-    available_colors = set()
 
     for variant in variants:
         try:
             if variant.inventory.is_available:
                 available_sizes.add(variant.size)
-                available_colors.add(variant.color)
         except Inventory.DoesNotExist:
             pass
 
@@ -548,7 +546,6 @@ def product_detail(request, product_id):
         'product':          product,
         'variants':         variants,
         'available_sizes':  sorted(available_sizes, key=lambda x: x.id),
-        'available_colors': sorted(available_colors, key=lambda x: x.name),
         'related_products': related_products,
     }
     return render(request, 'product_detail.html', context)
