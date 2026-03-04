@@ -43,8 +43,11 @@
                     class="w-full px-4 py-3 border-2 border-[#7DB8D8] rounded-xl focus:ring-2 focus:ring-[#5B8FC9] transition bg-white/80 backdrop-blur-sm">
                     <option value="">{% trans "All Categories" %}</option>
                     {% for cat in categories %}
-                    <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat|title }}
-                    </option>
+                    {% if cat == selected_category %}
+                    <option value="{{ cat }}" selected>{{ cat|title }}</option>
+                    {% else %}
+                    <option value="{{ cat }}">{{ cat|title }}</option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>
@@ -60,7 +63,11 @@
                     class="w-full px-4 py-3 border-2 border-[#7DB8D8] rounded-xl focus:ring-2 focus:ring-[#5B8FC9] transition bg-white/80 backdrop-blur-sm">
                     <option value="">{% trans "All" %}</option>
                     {% for gen in genders %}
-                    <option value="{{ gen }}" {% if gen == selected_gender %}selected{% endif %}>{{ gen|title }}</option>
+                    {% if gen == selected_gender %}
+                    <option value="{{ gen }}" selected>{{ gen|title }}</option>
+                    {% else %}
+                    <option value="{{ gen }}">{{ gen|title }}</option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>
@@ -116,13 +123,7 @@
                     class="w-full h-full object-cover">
                 {% endif %}
 
-                <!-- Floating Badge -->
-                <div class="absolute top-4 right-4 z-20">
-                    <span
-                        class="px-3 py-1 bg-gradient-to-r from-[#1B3A6B] to-[#2E5FA3] text-white text-xs font-bold rounded-full shadow-lg floating-badge">
-                        {{ product.fit_type|title }}
-                    </span>
-                </div>
+
             </div>
 
             <!-- Product Info -->
@@ -194,8 +195,8 @@
         <div class="relative p-12 text-center">
             <h2 class="text-4xl font-extrabold text-white mb-4">{% trans "Not Sure About Your Size?" %}</h2>
             <p class="text-xl text-white/95 mb-8 max-w-2xl mx-auto">
-                {% trans "Try our AI-powered virtual fitting system for personalized size recommendations and perfect
-                fit!" %}
+                Try our AI-powered virtual fitting system for personalized size recommendations and perfect
+                fit!
             </p>
             <a href="{% url 'fitting_system:scan' %}"
                 class="inline-flex items-center gap-3 bg-white text-[#1B3A6B] px-10 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105">
