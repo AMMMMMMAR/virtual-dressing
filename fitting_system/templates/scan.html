@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
 
@@ -8,7 +8,7 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">{% trans "Virtual Body Scan" %}</h1>
-        <p id="scan-subtitle" class="text-xl text-gray-600">Two images needed: full-body pose + face selfie</p>
+        <p id="scan-subtitle" class="text-xl text-gray-600">{% trans "Two images needed: full-body pose + face selfie" %}</p>
     </div>
 
     <!-- Gender Selector -->
@@ -45,7 +45,7 @@
                 </label>
                 <div class="flex items-center gap-3">
                     <div class="relative flex-1">
-                        <input type="number" id="user-height" min="100" max="250" step="1" placeholder="e.g. 175"
+                        <input type="number" id="user-height" min="100" max="250" step="1" placeholder="{% trans 'e.g. 175' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium text-gray-800 placeholder-gray-400"
                             oninput="validateHeightInput()">
                         <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">cm</span>
@@ -61,8 +61,8 @@
                         </span>
                     </div>
                 </div>
-                <p id="height-error" class="hidden text-red-500 text-sm mt-2">Please enter a valid height between 100 and 250 cm.</p>
-                <p class="text-gray-400 text-xs mt-2">Your height is used to calibrate YOLO body measurements for accuracy.</p>
+                <p id="height-error" class="hidden text-red-500 text-sm mt-2">{% trans "Please enter a valid height between 100 and 250 cm." %}</p>
+                <p class="text-gray-400 text-xs mt-2">{% trans "Your height is used to calibrate YOLO body measurements for accuracy." %}</p>
             </div>
         </div>
 
@@ -93,7 +93,7 @@
         <!-- ===== CAMERA MODE ===== -->
         <div id="camera-mode">
 
-            <!-- Progress Steps: 3 steps now (Body → Face → Process) -->
+            <!-- Progress Steps: 3 steps now (Body â†’ Face â†’ Process) -->
             <div class="mb-12">
                 <div class="flex items-center justify-center space-x-2 md:space-x-4 flex-wrap gap-y-4">
                     <div id="step1" class="flex items-center">
@@ -128,7 +128,7 @@
                         <canvas id="canvas" class="hidden"></canvas>
                         <canvas id="overlay-canvas" class="absolute inset-0 pointer-events-none w-full h-full"></canvas>
 
-                        <!-- Visual Guide – Full Body -->
+                        <!-- Visual Guide â€“ Full Body -->
                         <div id="visual-guide-body"
                             class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-70 transition-all duration-300">
                             <div id="head-guide"
@@ -139,7 +139,7 @@
                             </div>
                         </div>
 
-                        <!-- Visual Guide – Face Selfie -->
+                        <!-- Visual Guide â€“ Face Selfie -->
                         <div id="visual-guide-face"
                             class="hidden absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-70 transition-all duration-300">
                             <div id="face-guide"
@@ -183,7 +183,7 @@
                                     class="h-2 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-100"
                                     style="width: 0%"></div>
                             </div>
-                            <p class="text-center text-white text-sm mt-2 font-medium">Auto-capturing when position is correct...</p>
+                            <p class="text-center text-white text-sm mt-2 font-medium">{% trans "Auto-capturing when position is correct..." %}</p>
                         </div>
 
                         <!-- Loading spinner -->
@@ -194,7 +194,7 @@
                                     class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white mx-auto mb-4">
                                 </div>
                                 <p class="text-white text-lg">{% trans "Analysing with YOLO + AI..." %}</p>
-                                <p class="text-gray-300 text-sm mt-2">Detecting pose, measuring body, detecting skin tone...</p>
+                                <p class="text-gray-300 text-sm mt-2">{% trans "Detecting pose, measuring body, detecting skin tone..." %}</p>
                             </div>
                         </div>
                     </div>
@@ -205,10 +205,10 @@
                     <h3 class="font-bold text-lg text-[#1B3A6B] mb-3">{% trans "Step 1: Body Pose (Auto-Capture)" %}
                     </h3>
                     <ul class="space-y-2 text-[#2E5FA3]">
-                        <li>✓ {% trans "Stand 2–3 metres away from the camera" %}</li>
-                        <li>✓ {% trans "Align your full body with the guide outline" %}</li>
-                        <li>✓ {% trans "Stand straight with arms slightly away from your body" %}</li>
-                        <li>⚡ <strong>Image captures automatically when you're positioned correctly!</strong></li>
+                        <li>&#10003; {% trans "Stand 2-3 metres away from the camera" %}</li>
+                        <li>&#10003; {% trans "Align your full body with the guide outline" %}</li>
+                        <li>&#10003; {% trans "Stand straight with arms slightly away from your body" %}</li>
+                        <li>&#9889; <strong>{% trans "Image captures automatically when you're positioned correctly!" %}</strong></li>
                     </ul>
                 </div>
 
@@ -217,12 +217,12 @@
                     <h3 class="font-bold text-lg text-gray-900 mb-3">{% trans "Captured Images:" %}</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div id="front-preview-container" class="hidden">
-                            <p class="text-sm text-gray-600 mb-2">{% trans "Body Pose" %} ✓</p>
+                            <p class="text-sm text-gray-600 mb-2">{% trans "Body Pose" %} &#10003;</p>
                             <img id="front-preview" class="w-full rounded-lg border-2 border-green-400"
                                 alt="{% trans 'Body pose' %}">
                         </div>
                         <div id="face-preview-container" class="hidden">
-                            <p class="text-sm text-gray-600 mb-2">{% trans "Face Selfie" %} ✓</p>
+                            <p class="text-sm text-gray-600 mb-2">{% trans "Face Selfie" %} &#10003;</p>
                             <img id="face-preview" class="w-full rounded-lg border-2 border-amber-400"
                                 alt="{% trans 'Face selfie' %}">
                         </div>
@@ -264,7 +264,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             {% trans "Body Pose" %} <span class="text-red-500">*</span>
-                            <span class="text-gray-400 font-normal">(required – full body, front view)</span>
+                            <span class="text-gray-400 font-normal">({% trans "required – full body, front view" %})</span>
                         </label>
                         <div id="front-dropzone"
                             class="relative border-2 border-dashed border-[#5B8FC9] rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:border-[#1B3A6B] hover:bg-[#EAF3F8]/50 group"
@@ -285,14 +285,14 @@
                                 </div>
                                 <p class="text-gray-600 font-medium">{% trans "Drop body photo here" %}</p>
                                 <p class="text-gray-400 text-sm mt-1">{% trans "or click to browse" %}</p>
-                                <p class="text-gray-400 text-xs mt-3">Stand facing the camera, full body visible</p>
+                                <p class="text-gray-400 text-xs mt-3">{% trans "Stand facing the camera, full body visible" %}</p>
                             </div>
                             <div id="front-upload-preview" class="hidden">
                                 <img id="front-upload-img" class="max-h-64 mx-auto rounded-lg shadow-md"
                                     alt="{% trans 'Body pose' %}">
-                                <p class="text-green-600 font-medium mt-3">✓ {% trans "Body image ready" %}</p>
+                                <p class="text-green-600 font-medium mt-3">&#10003; {% trans "Body image ready" %}</p>
                                 <button type="button" onclick="event.stopPropagation(); removeUpload('front')"
-                                    class="mt-2 text-sm text-red-500 hover:text-red-700 underline">Remove</button>
+                                    class="mt-2 text-sm text-red-500 hover:text-red-700 underline">{% trans "Remove" %}</button>
                             </div>
                         </div>
                     </div>
@@ -301,7 +301,7 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             {% trans "Face Selfie" %} <span class="text-red-500">*</span>
-                            <span class="text-gray-400 font-normal">(required – close-up face for skin tone)</span>
+                            <span class="text-gray-400 font-normal">({% trans "required – close-up face for skin tone" %})</span>
                         </label>
                         <div id="face-dropzone"
                             class="relative border-2 border-dashed border-amber-300 rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:border-amber-500 hover:bg-amber-50/50 group"
@@ -328,9 +328,9 @@
                             <div id="face-upload-preview" class="hidden">
                                 <img id="face-upload-img" class="max-h-64 mx-auto rounded-lg shadow-md"
                                     alt="{% trans 'Face selfie' %}">
-                                <p class="text-amber-600 font-medium mt-3">✓ {% trans "Face image ready" %}</p>
+                                <p class="text-amber-600 font-medium mt-3">&#10003; {% trans "Face image ready" %}</p>
                                 <button type="button" onclick="event.stopPropagation(); removeUpload('face')"
-                                    class="mt-2 text-sm text-red-500 hover:text-red-700 underline">Remove</button>
+                                    class="mt-2 text-sm text-red-500 hover:text-red-700 underline">{% trans "Remove" %}</button>
                             </div>
                         </div>
                     </div>
@@ -340,10 +340,10 @@
                 <div class="bg-[#EAF3F8] rounded-xl p-5 mb-6">
                     <h3 class="font-bold text-[#1B3A6B] mb-2">{% trans "Tips for best results:" %}</h3>
                     <ul class="space-y-1.5 text-sm text-[#2E5FA3]">
-                        <li>✓ {% trans "Body photo: full body visible from head to toe, good lighting" %}</li>
-                        <li>✓ {% trans "Body photo: stand straight with arms slightly away from body" %}</li>
-                        <li>✓ {% trans "Face selfie: close-up, face fills most of the frame" %}</li>
-                        <li>✓ {% trans "Face selfie: natural lighting, no heavy filters" %}</li>
+                        <li>&#10003; {% trans "Body photo: full body visible from head to toe, good lighting" %}</li>
+                        <li>&#10003; {% trans "Body photo: stand straight with arms slightly away from body" %}</li>
+                        <li>&#10003; {% trans "Face selfie: close-up, face fills most of the frame" %}</li>
+                        <li>&#10003; {% trans "Face selfie: natural lighting, no heavy filters" %}</li>
                     </ul>
                 </div>
 
@@ -359,7 +359,7 @@
                             class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#5B8FC9] mx-auto mb-4">
                         </div>
                         <p class="text-white text-lg font-medium">{% trans "Analysing with YOLO + AI..." %}</p>
-                                <p class="text-gray-300 text-sm mt-2">Detecting pose, measuring body, detecting skin tone...</p>
+                                <p class="text-gray-300 text-sm mt-2">{% trans "Detecting pose, measuring body, detecting skin tone..." %}</p>
                     </div>
                 </div>
 
@@ -380,7 +380,7 @@
         <div class="bg-white rounded-2xl shadow-xl p-8">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">{% trans "Enter Your Measurements" %}</h2>
-                <p class="text-gray-500">Enter your body measurements and upload a hand photo for skin tone</p>
+                <p class="text-gray-500">{% trans "Enter your body measurements and upload a hand photo for skin tone" %}</p>
             </div>
 
             <!-- Required Measurements -->
@@ -394,25 +394,25 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Height" %} (cm) <span
                                 class="text-red-500">*</span></label>
-                        <input type="number" id="w-height" min="100" max="250" step="1" placeholder="e.g. 165"
+                        <input type="number" id="w-height" min="100" max="250" step="1" placeholder="{% trans 'e.g. 165' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Bust / Chest" %} (cm)
                             <span class="text-red-500">*</span></label>
-                        <input type="number" id="w-chest" min="50" max="200" step="0.5" placeholder="e.g. 88"
+                        <input type="number" id="w-chest" min="50" max="200" step="0.5" placeholder="{% trans 'e.g. 88' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Waist" %} (cm) <span
                                 class="text-red-500">*</span></label>
-                        <input type="number" id="w-waist" min="40" max="200" step="0.5" placeholder="e.g. 68"
+                        <input type="number" id="w-waist" min="40" max="200" step="0.5" placeholder="{% trans 'e.g. 68' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Hip" %} (cm) <span
                                 class="text-red-500">*</span></label>
-                        <input type="number" id="w-hip" min="50" max="200" step="0.5" placeholder="e.g. 96"
+                        <input type="number" id="w-hip" min="50" max="200" step="0.5" placeholder="{% trans 'e.g. 96' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium">
                     </div>
                 </div>
@@ -430,24 +430,24 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Shoulder Width" %}
                             (cm)</label>
-                        <input type="number" id="w-shoulder" min="20" max="70" step="0.5" placeholder="e.g. 38"
+                        <input type="number" id="w-shoulder" min="20" max="70" step="0.5" placeholder="{% trans 'e.g. 38' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Inseam" %} (cm)</label>
-                        <input type="number" id="w-inseam" min="40" max="110" step="0.5" placeholder="e.g. 76"
+                        <input type="number" id="w-inseam" min="40" max="110" step="0.5" placeholder="{% trans 'e.g. 76' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Arm Length" %}
                             (cm)</label>
-                        <input type="number" id="w-arm" min="30" max="100" step="0.5" placeholder="e.g. 56"
+                        <input type="number" id="w-arm" min="30" max="100" step="0.5" placeholder="{% trans 'e.g. 56' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Torso Length" %}
                             (cm)</label>
-                        <input type="number" id="w-torso" min="20" max="80" step="0.5" placeholder="e.g. 42"
+                        <input type="number" id="w-torso" min="20" max="80" step="0.5" placeholder="{% trans 'e.g. 42' %}"
                             class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#5B8FC9] focus:ring-2 focus:ring-[#5B8FC9]/30 outline-none transition-all text-lg font-medium">
                     </div>
                 </div>
@@ -478,11 +478,11 @@
                         </div>
                         <p class="text-gray-600 font-medium">{% trans "Drop hand photo here" %}</p>
                         <p class="text-gray-400 text-sm mt-1">{% trans "or click to browse" %}</p>
-                        <p class="text-gray-400 text-xs mt-3">Photo of the back of your hand, good lighting, no filters</p>
+                        <p class="text-gray-400 text-xs mt-3">{% trans "Photo of the back of your hand, good lighting, no filters" %}</p>
                     </div>
                     <div id="hand-upload-preview" class="hidden">
                         <img id="hand-upload-img" class="max-h-64 mx-auto rounded-lg shadow-md" alt="Hand photo">
-                        <p class="text-amber-600 font-medium mt-3">✓ {% trans "Hand image ready" %}</p>
+                        <p class="text-amber-600 font-medium mt-3">&#10003; {% trans "Hand image ready" %}</p>
                         <button type="button" onclick="event.stopPropagation(); removeHandUpload()"
                             class="mt-2 text-sm text-red-500 hover:text-red-700 underline">{% trans "Remove" %}</button>
                     </div>
@@ -493,11 +493,11 @@
             <div class="bg-[#EAF3F8] rounded-xl p-5 mb-6">
                 <h3 class="font-bold text-[#1B3A6B] mb-2">{% trans "How to measure:" %}</h3>
                 <ul class="space-y-1.5 text-sm text-[#2E5FA3]">
-                    <li>📏 {% trans "Use a soft measuring tape for best results" %}</li>
-                    <li>📏 {% trans "Bust: measure around the fullest part of your chest" %}</li>
-                    <li>📏 {% trans "Waist: measure around your natural waistline" %}</li>
-                    <li>📏 {% trans "Hip: measure around the widest part of your hips" %}</li>
-                    <li>🖐️ {% trans "Hand photo: back of hand, natural light, no makeup or filters" %}</li>
+                    <li>&#10003; {% trans "Use a soft measuring tape for best results" %}</li>
+                    <li>&#10003; {% trans "Bust: measure around the fullest part of your chest" %}</li>
+                    <li>&#10003; {% trans "Waist: measure around your natural waistline" %}</li>
+                    <li>&#10003; {% trans "Hip: measure around the widest part of your hips" %}</li>
+                    <li>&#9889; {% trans "Hand photo: back of hand, natural light, no makeup or filters" %}</li>
                 </ul>
             </div>
 
@@ -570,20 +570,20 @@
     window.SCAN_I18N = {
         statusInit: "{% trans 'Initializing camera...' %}",
         statusAlign: "{% trans 'Align your body with the guide' %}",
-        statusNoPerson: "{% trans 'No person detected – step into frame' %}",
+        statusNoPerson: "{% trans 'No person detected â€“ step into frame' %}",
         statusReady: "{% trans 'Ready to process your scan!' %}",
         statusCameraDenied: "{% trans 'Camera access denied' %}",
         errorCamera: "{% trans 'Camera access denied. Please allow camera access.' %}",
         errorBodyImage: "{% trans 'Please capture a body pose image.' %}",
         errorFaceImage: "{% trans 'Please capture a face selfie.' %}",
-        errorHeight: "{% trans 'Please enter a valid height (100–250 cm) before processing.' %}",
+        errorHeight: "{% trans 'Please enter a valid height (100-250 cm) before processing.' %}",
         errorProcess: "{% trans 'Processing failed. Please try again.' %}",
         errorNetwork: "{% trans 'Network error. Please check your connection and try again.' %}",
         errorUploadBody: "{% trans 'Please upload a body pose image.' %}",
         errorUploadFace: "{% trans 'Please upload a face selfie image.' %}",
-        errorUploadHeight: "{% trans 'Please enter a valid height (100–250 cm) before processing.' %}",
+        errorUploadHeight: "{% trans 'Please enter a valid height (100-250 cm) before processing.' %}",
         step1Title: "{% trans 'Step 1: Body Pose (Auto-Capture)' %}",
-        step1_1: "{% trans 'Stand 2–3 metres away from the camera' %}",
+        step1_1: "{% trans 'Stand 2-3 metres away from the camera' %}",
         step1_2: "{% trans 'Align your full body with the guide outline' %}",
         step1_3: "{% trans 'Stand straight with arms slightly away from your body' %}",
         step1_4: "{% trans 'Image captures automatically when you\'re positioned correctly!' %}",
@@ -596,7 +596,14 @@
         step3Title: "{% trans 'Step 3: Ready to Process' %}",
         step3_1: "{% trans 'Both images captured successfully!' %}",
         step3_2: "{% trans 'Click Process Scan to analyse your measurements & skin tone' %}",
-        step3_3: "{% trans 'You can start over if needed' %}"
+        step3_3: "{% trans 'You can start over if needed' %}",
+        subtitleMen: "{% trans 'Two images needed: full-body pose + face selfie' %}",
+        subtitleWomen: "{% trans 'Enter your measurements and upload a hand photo' %}",
+        errorWomenHeight: "{% trans 'Please enter a valid height between 100 and 250 cm.' %}",
+        errorWomenBust: "{% trans 'Please enter your bust/chest measurement.' %}",
+        errorWomenWaist: "{% trans 'Please enter your waist measurement.' %}",
+        errorWomenHip: "{% trans 'Please enter your hip measurement.' %}",
+        errorWomenHand: "{% trans 'Please upload a hand photo for skin tone detection.' %}"
     };
 </script>
 <script>
@@ -644,8 +651,10 @@
     }
 
     function resizeOverlay() {
-        overlayCanvas.width = video.videoWidth || video.clientWidth;
-        overlayCanvas.height = video.videoHeight || video.clientHeight;
+        const preview = document.querySelector('#camera-container .relative');
+        if (!preview) return;
+        overlayCanvas.width = Math.max(1, Math.round(preview.clientWidth));
+        overlayCanvas.height = Math.max(1, Math.round(preview.clientHeight));
     }
 
     // ===== REAL-TIME ANALYSIS =====
@@ -693,7 +702,7 @@
 
     function handleAnalysisResult(result) {
         if (!result.detected) {
-            updateStatus('error', window.SCAN_I18N ? window.SCAN_I18N.statusNoPerson : 'No person detected – step into frame');
+            updateStatus('error', window.SCAN_I18N ? window.SCAN_I18N.statusNoPerson : 'No person detected â€“ step into frame');
             clearLandmarks();
             goodPoseStartTime = null;
             updateCaptureProgress(0);
@@ -814,11 +823,11 @@
         document.getElementById('instructions').innerHTML = `
             <h3 class="font-bold text-lg text-amber-700 mb-3">` + (i.step2Title || 'Step 2: Face Selfie (Auto-Capture)') + `</h3>
             <ul class="space-y-2 text-amber-800">
-                <li>📱 <strong>` + (i.step2_1 || 'Come close to the camera like a selfie!') + `</strong></li>
-                <li>✓ ` + (i.step2_2 || 'Your face should fill most of the circle') + `</li>
-                <li>✓ ` + (i.step2_3 || 'Position your face in the centre of the guide') + `</li>
-                <li>✓ ` + (i.step2_4 || 'Ensure good, natural lighting on your face') + `</li>
-                <li>⚡ <strong>` + (i.step2_5 || "Image captures automatically when you're close enough!") + `</strong></li>
+                <li>&#10003; <strong>` + (i.step2_1 || 'Come close to the camera like a selfie!') + `</strong></li>
+                <li>&#10003; ` + (i.step2_2 || 'Your face should fill most of the circle') + `</li>
+                <li>&#10003; ` + (i.step2_3 || 'Position your face in the centre of the guide') + `</li>
+                <li>&#10003; ` + (i.step2_4 || 'Ensure good, natural lighting on your face') + `</li>
+                <li>&#9889; <strong>` + (i.step2_5 || "Image captures automatically when you're close enough!") + `</strong></li>
             </ul>
         `;
 
@@ -845,9 +854,9 @@
         document.getElementById('instructions').innerHTML = `
             <h3 class="font-bold text-lg text-emerald-700 mb-3">` + (i3.step3Title || 'Step 3: Ready to Process') + `</h3>
             <ul class="space-y-2 text-emerald-800">
-                <li>✓ ` + (i3.step3_1 || 'Both images captured successfully!') + `</li>
-                <li>✓ ` + (i3.step3_2 || 'Click "Process Scan" to analyse your measurements & skin tone') + `</li>
-                <li>✓ ` + (i3.step3_3 || 'You can start over if needed') + `</li>
+                <li>&#10003; ` + (i3.step3_1 || 'Both images captured successfully!') + `</li>
+                <li>&#10003; ` + (i3.step3_2 || 'Click "Process Scan" to analyse your measurements & skin tone') + `</li>
+                <li>&#10003; ` + (i3.step3_3 || 'You can start over if needed') + `</li>
             </ul>
         `;
 
@@ -894,7 +903,7 @@
 
         const userHeight = getValidatedHeight();
         if (!userHeight) {
-            showError(i.errorHeight || 'Please enter a valid height (100–250 cm) before processing.');
+            showError(i.errorHeight || 'Please enter a valid height (100-250 cm) before processing.');
             document.getElementById('user-height').focus();
             return;
         }
@@ -951,10 +960,10 @@
         document.getElementById('instructions').innerHTML = `
             <h3 class="font-bold text-lg text-[#1B3A6B] mb-3">` + (i1.step1Title || 'Step 1: Body Pose (Auto-Capture)') + `</h3>
             <ul class="space-y-2 text-[#2E5FA3]">
-                <li>✓ ` + (i1.step1_1 || 'Stand 2–3 metres away from the camera') + `</li>
-                <li>✓ ` + (i1.step1_2 || 'Align your full body with the guide outline') + `</li>
-                <li>✓ ` + (i1.step1_3 || 'Stand straight with arms slightly away from your body') + `</li>
-                <li>⚡ <strong>` + (i1.step1_4 || "Image captures automatically when you're positioned correctly!") + `</strong></li>
+                <li>&#10003; ` + (i1.step1_1 || 'Stand 2-3 metres away from the camera') + `</li>
+                <li>&#10003; ` + (i1.step1_2 || 'Align your full body with the guide outline') + `</li>
+                <li>&#10003; ` + (i1.step1_3 || 'Stand straight with arms slightly away from your body') + `</li>
+                <li>&#9889; <strong>` + (i1.step1_4 || "Image captures automatically when you're positioned correctly!") + `</strong></li>
             </ul>
         `;
 
@@ -1089,6 +1098,7 @@
             tabCamera.className = 'flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 bg-white text-[#1B3A6B] shadow-md';
             tabUpload.className = 'flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 text-gray-500 hover:text-gray-700';
             if (video && video.srcObject) video.play();
+            setTimeout(resizeOverlay, 0);
         } else {
             cameraMode.classList.add('hidden');
             uploadMode.classList.remove('hidden');
@@ -1167,7 +1177,7 @@
 
         const userHeight = getValidatedHeight();
         if (!userHeight) {
-            showUploadError(i.errorUploadHeight || i.errorHeight || 'Please enter a valid height (100–250 cm) before processing.');
+            showUploadError(i.errorUploadHeight || i.errorHeight || 'Please enter a valid height (100-250 cm) before processing.');
             document.getElementById('user-height').focus();
             return;
         }
@@ -1228,13 +1238,14 @@
             womenFlow.classList.add('hidden');
             btnMen.className = activeClass;
             btnWomen.className = inactiveClass;
-            subtitle.textContent = 'Two images needed: full-body pose + face selfie';
+            subtitle.textContent = (window.SCAN_I18N && window.SCAN_I18N.subtitleMen) || 'Two images needed: full-body pose + face selfie';
+            setTimeout(resizeOverlay, 0);
         } else {
             menFlow.classList.add('hidden');
             womenFlow.classList.remove('hidden');
             btnMen.className = inactiveClass;
             btnWomen.className = activeClass;
-            subtitle.textContent = 'Enter your measurements and upload a hand photo';
+            subtitle.textContent = (window.SCAN_I18N && window.SCAN_I18N.subtitleWomen) || 'Enter your measurements and upload a hand photo';
             if (video && video.srcObject) video.pause();
             stopAnalysis();
         }
@@ -1306,14 +1317,15 @@
         const waist = parseFloat(document.getElementById('w-waist').value);
         const hip = parseFloat(document.getElementById('w-hip').value);
 
+        var i = window.SCAN_I18N || {};
         if (isNaN(height) || height < 100 || height > 250) {
-            showWomenError('Please enter a valid height between 100 and 250 cm.');
+            showWomenError(i.errorWomenHeight || 'Please enter a valid height between 100 and 250 cm.');
             return;
         }
-        if (isNaN(chest)) { showWomenError('Please enter your bust/chest measurement.'); return; }
-        if (isNaN(waist)) { showWomenError('Please enter your waist measurement.'); return; }
-        if (isNaN(hip)) { showWomenError('Please enter your hip measurement.'); return; }
-        if (!uploadHandData) { showWomenError('Please upload a hand photo for skin tone detection.'); return; }
+        if (isNaN(chest)) { showWomenError(i.errorWomenBust || 'Please enter your bust/chest measurement.'); return; }
+        if (isNaN(waist)) { showWomenError(i.errorWomenWaist || 'Please enter your waist measurement.'); return; }
+        if (isNaN(hip)) { showWomenError(i.errorWomenHip || 'Please enter your hip measurement.'); return; }
+        if (!uploadHandData) { showWomenError(i.errorWomenHand || 'Please upload a hand photo for skin tone detection.'); return; }
 
         const measurements = { height, chest, waist, hip };
 
@@ -1345,12 +1357,12 @@
             if (data.success) {
                 window.location.href = `${window.LANG_PREFIX || ''}/recommendations/${data.session_id}/`;
             } else {
-                showWomenError(data.error || 'Processing failed. Please try again.');
+                showWomenError(data.error || i.errorProcess || 'Processing failed. Please try again.');
                 document.getElementById('women-loading').classList.add('hidden');
                 document.getElementById('women-process-btn').disabled = false;
             }
         } catch (error) {
-            showWomenError('Network error. Please check your connection and try again.');
+            showWomenError(i.errorNetwork || 'Network error. Please check your connection and try again.');
             document.getElementById('women-loading').classList.add('hidden');
             document.getElementById('women-process-btn').disabled = false;
         }
@@ -1358,3 +1370,7 @@
 
 </script>
 {% endblock %}
+
+
+
+

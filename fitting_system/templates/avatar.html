@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
 
@@ -6,7 +6,7 @@
 
 {% block extra_css %}
 <style>
-    /* Avatar page overrides — dark theme for the 3D viewer area */
+    /* Avatar page overrides â€” dark theme for the 3D viewer area */
     .avatar-page {
         display: flex;
         min-height: calc(100vh - 64px);
@@ -335,20 +335,20 @@
             <!-- SKIN TONE SWATCHES -->
             <div class="av-section">
                 <div class="av-section-header">
-                    <div class="av-section-icon skin">🧬</div>
+                    <div class="av-section-icon skin">ًں§¬</div>
                     <div class="av-section-title">{% trans "Skin Tone" %}</div>
                 </div>
                 <div class="av-swatches-skin" id="avSkinSwatches">
                     <div class="av-swatch" style="background:#fde8d0" data-hex="fde8d0" data-skin="0"
-                        data-tip="Very Light"></div>
-                    <div class="av-swatch" style="background:#f5cba7" data-hex="f5cba7" data-skin="1" data-tip="Light">
+                        data-tip="{% trans 'Very Light' %}"></div>
+                    <div class="av-swatch" style="background:#f5cba7" data-hex="f5cba7" data-skin="1" data-tip="{% trans 'Light' %}">
                     </div>
                     <div class="av-swatch" style="background:#e8a87c" data-hex="e8a87c" data-skin="2"
-                        data-tip="Intermediate">
+                        data-tip="{% trans 'Intermediate' %}">
                     </div>
-                    <div class="av-swatch" style="background:#c68642" data-hex="c68642" data-skin="3" data-tip="Tan">
+                    <div class="av-swatch" style="background:#c68642" data-hex="c68642" data-skin="3" data-tip="{% trans 'Tan' %}">
                     </div>
-                    <div class="av-swatch" style="background:#8d5524" data-hex="8d5524" data-skin="4" data-tip="Dark">
+                    <div class="av-swatch" style="background:#8d5524" data-hex="8d5524" data-skin="4" data-tip="{% trans 'Dark' %}">
                     </div>
                 </div>
             </div>
@@ -358,10 +358,10 @@
             <!-- SHIRT COLORS -->
             <div class="av-section">
                 <div class="av-section-header">
-                    <div class="av-section-icon shirt">👕</div>
+                    <div class="av-section-icon shirt">ًں‘•</div>
                     <div class="av-section-title">{% trans "T-Shirt Color" %}</div>
                 </div>
-                <div class="av-suggest-label" id="avShirtSuggest">✦ {% trans "Suggested for your skin tone" %}</div>
+                <div class="av-suggest-label" id="avShirtSuggest">âœ¦ {% trans "Suggested for your skin tone" %}</div>
                 <div class="av-swatches-clothes" id="avShirtSwatches"></div>
             </div>
 
@@ -370,10 +370,10 @@
             <!-- PANTS COLORS -->
             <div class="av-section">
                 <div class="av-section-header">
-                    <div class="av-section-icon pants">👖</div>
+                    <div class="av-section-icon pants">ًں‘–</div>
                     <div class="av-section-title">{% trans "Pants Color" %}</div>
                 </div>
-                <div class="av-suggest-label" id="avPantsSuggest">✦ {% trans "Suggested for your skin tone" %}</div>
+                <div class="av-suggest-label" id="avPantsSuggest">âœ¦ {% trans "Suggested for your skin tone" %}</div>
                 <div class="av-swatches-clothes" id="avPantsSwatches"></div>
             </div>
 
@@ -382,8 +382,7 @@
             <!-- Footer hint -->
             <div style="text-align: center; padding: 8px 0;">
                 <p style="font-size: 10px; color: rgba(255,255,255,0.2); line-height: 1.7;">
-                    <span style="display: block; color: rgba(255,255,255,0.3); margin-bottom: 2px;">🖱 {% trans "Drag to
-                        rotate · Scroll to zoom" %}</span>
+                    <span style="display: block; color: rgba(255,255,255,0.3); margin-bottom: 2px;">{% trans "Drag to rotate · Scroll to zoom" %}</span>
                     {% trans "Colors update with your skin tone" %}
                 </p>
             </div>
@@ -392,7 +391,7 @@
 
     <!-- ===== 3D CANVAS ===== -->
     <div class="avatar-canvas-area" id="av-canvas-container">
-        <div id="av-debug">⏳ {% trans "Loading 3D model..." %}</div>
+        <div id="av-debug">âڈ³ {% trans "Loading 3D model..." %}</div>
     </div>
 
 </div>
@@ -413,7 +412,7 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-    // ── Django context ──
+    // â”€â”€ Django context â”€â”€
     const INITIAL_SKIN_INDEX = {{ skin_tone_index }};
     const GENDER = '{{ gender }}';
     const MODEL_URL = GENDER === 'women'
@@ -423,21 +422,21 @@
     const dbg = document.getElementById('av-debug');
     const container = document.getElementById('av-canvas-container');
 
-    // ────────────────────────────────────────────────────────────────
-    //  DYNAMIC PALETTES — injected from Django / color_palettes.py
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  DYNAMIC PALETTES â€” injected from Django / color_palettes.py
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const SKIN_TONE_KEYS = ['very_light', 'light', 'intermediate', 'tan', 'dark'];
     const PALETTES_BY_KEY = JSON.parse('{{ palettes_json|escapejs }}');
     const INITIAL_SKIN_KEY = '{{ skin_tone_key }}';
     const REC_SHIRT_HEX = '{{ rec_shirt_hex }}';
     const REC_PANTS_HEX = '{{ rec_pants_hex }}';
 
-    // Map skin swatch index → skin tone key
+    // Map skin swatch index â†’ skin tone key
     const INDEX_TO_KEY = { 0: 'very_light', 1: 'light', 2: 'intermediate', 3: 'tan', 4: 'dark' };
 
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     //  THREE.JS SETUP
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0f1729);
 
@@ -482,9 +481,9 @@
     floor.receiveShadow = true;
     scene.add(floor);
 
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     //  MESH BUCKETS
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const skinMeshes = [];
     const shirtMeshes = [];
     const pantsMeshes = [];
@@ -532,9 +531,9 @@
         mats.forEach(mat => { mat.color.setHex(entry.hexColor); mat.map = null; mat.needsUpdate = true; });
     }
 
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     //  PALETTE UI
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let currentShirtHex = null;
     let currentPantsHex = null;
 
@@ -546,7 +545,7 @@
 
         const lightHexes = new Set(['ffffff', 'f5f5f5', 'fffde7', 'e0e0e0', 'cfd8dc', 'e8d5f5', 'b5d8f7', 'f7c5d0', 'bbdefb', 'a5d6a7', 'ef9a9a', 'fff176']);
 
-        // ── Shirt swatches ──
+        // â”€â”€ Shirt swatches â”€â”€
         shirtGrid.innerHTML = '';
         palette.shirts.forEach((item, i) => {
             const sw = document.createElement('div');
@@ -565,7 +564,7 @@
             shirtGrid.appendChild(sw);
         });
 
-        // ── Pants swatches ──
+        // â”€â”€ Pants swatches â”€â”€
         pantsGrid.innerHTML = '';
         palette.pants.forEach((item, i) => {
             const sw = document.createElement('div');
@@ -604,9 +603,9 @@
         applyClothingColor(pantsMeshes, currentPantsHex);
     }
 
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     //  LOAD MODEL
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     new GLTFLoader().load(
         MODEL_URL,
         function (gltf) {
@@ -689,7 +688,7 @@
             lockedMeshes.forEach(applyLocked);
 
             dbg.innerHTML =
-                `🧬 Skin: <b>${skinMeshes.length}</b> &nbsp;👕 Shirt: <b>${shirtMeshes.length}</b> &nbsp;👖 Pants: <b>${pantsMeshes.length}</b> &nbsp;🔒 Locked: <b>${lockedMeshes.length}</b><br>` +
+                `ًں§¬ Skin: <b>${skinMeshes.length}</b> &nbsp;ًں‘• Shirt: <b>${shirtMeshes.length}</b> &nbsp;ًں‘– Pants: <b>${pantsMeshes.length}</b> &nbsp;ًں”’ Locked: <b>${lockedMeshes.length}</b><br>` +
                 `<span style="opacity:.5;font-size:9px">Model: ${GENDER === 'women' ? 'FEMALE' : 'MALE'}.glb</span>`;
 
             // Auto-select the detected skin tone
@@ -705,12 +704,12 @@
             }
         },
         undefined,
-        err => { console.error(err); dbg.innerHTML = `<span style="color:#ff6b6b">❌ ${err.message}</span>`; }
+        err => { console.error(err); dbg.innerHTML = `<span style="color:#ff6b6b">â‌Œ ${err.message}</span>`; }
     );
 
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     //  SKIN SWATCH CLICK
-    // ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('avSkinSwatches').querySelectorAll('.av-swatch').forEach(sw => {
         sw.addEventListener('click', () => {
             document.getElementById('avSkinSwatches').querySelectorAll('.av-swatch').forEach(s => s.classList.remove('active'));
@@ -722,14 +721,14 @@
         });
     });
 
-    // ── Render loop ──
+    // â”€â”€ Render loop â”€â”€
     (function animate() {
         requestAnimationFrame(animate);
         controls.update();
         renderer.render(scene, camera);
     })();
 
-    // ── Resize ──
+    // â”€â”€ Resize â”€â”€
     new ResizeObserver(() => {
         const w = Math.max(container.clientWidth, 1);
         const h = Math.max(container.clientHeight, 1);
@@ -739,3 +738,5 @@
     }).observe(container);
 </script>
 {% endblock %}
+
+

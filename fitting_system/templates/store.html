@@ -42,11 +42,11 @@
                 <select name="category"
                     class="w-full px-4 py-3 border-2 border-[#7DB8D8] rounded-xl focus:ring-2 focus:ring-[#5B8FC9] transition bg-white/80 backdrop-blur-sm">
                     <option value="">{% trans "All Categories" %}</option>
-                    {% for cat in categories %}
-                    {% if cat == selected_category %}
-                    <option value="{{ cat }}" selected>{{ cat|title }}</option>
+                    {% for cat in category_options %}
+                    {% if cat.value == selected_category %}
+                    <option value="{{ cat.value }}" selected>{{ cat.label }}</option>
                     {% else %}
-                    <option value="{{ cat }}">{{ cat|title }}</option>
+                    <option value="{{ cat.value }}">{{ cat.label }}</option>
                     {% endif %}
                     {% endfor %}
                 </select>
@@ -62,11 +62,11 @@
                 <select name="gender"
                     class="w-full px-4 py-3 border-2 border-[#7DB8D8] rounded-xl focus:ring-2 focus:ring-[#5B8FC9] transition bg-white/80 backdrop-blur-sm">
                     <option value="">{% trans "All" %}</option>
-                    {% for gen in genders %}
-                    {% if gen == selected_gender %}
-                    <option value="{{ gen }}" selected>{{ gen|title }}</option>
+                    {% for gen in gender_options %}
+                    {% if gen.value == selected_gender %}
+                    <option value="{{ gen.value }}" selected>{{ gen.label }}</option>
                     {% else %}
-                    <option value="{{ gen }}">{{ gen|title }}</option>
+                    <option value="{{ gen.value }}">{{ gen.label }}</option>
                     {% endif %}
                     {% endfor %}
                 </select>
@@ -99,27 +99,27 @@
 
                 <!-- Dynamic product image: Priority to uploaded image, then fallback to static defaults -->
                 {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                <img src="{{ product.image.url }}" alt="{{ product.localized_name|default:product.name }}" class="w-full h-full object-cover">
                 {% elif product.category == 'shirt' and product.gender == 'men' %}
-                <img src="{% static 'images/products/mens_shirt.png' %}" alt="{{ product.name }}"
+                <img src="{% static 'images/products/mens_shirt.png' %}" alt="{{ product.localized_name|default:product.name }}"
                     class="w-full h-full object-cover">
                 {% elif product.category == 'shirt' and product.gender == 'women' %}
-                <img src="{% static 'images/products/blouse.png' %}" alt="{{ product.name }}"
+                <img src="{% static 'images/products/blouse.png' %}" alt="{{ product.localized_name|default:product.name }}"
                     class="w-full h-full object-cover">
                 {% elif product.category == 'dress' %}
-                <img src="{% static 'images/products/womens_dress.png' %}" alt="{{ product.name }}"
+                <img src="{% static 'images/products/womens_dress.png' %}" alt="{{ product.localized_name|default:product.name }}"
                     class="w-full h-full object-cover">
                 {% elif product.category == 'pants' or product.category == 'jeans' %}
-                <img src="{% static 'images/products/jeans.png' %}" alt="{{ product.name }}"
+                <img src="{% static 'images/products/jeans.png' %}" alt="{{ product.localized_name|default:product.name }}"
                     class="w-full h-full object-cover">
                 {% elif product.category == 'jacket' %}
-                <img src="{% static 'images/products/jacket.png' %}" alt="{{ product.name }}"
+                <img src="{% static 'images/products/jacket.png' %}" alt="{{ product.localized_name|default:product.name }}"
                     class="w-full h-full object-cover">
                 {% elif product.category == 't-shirt' or product.category == 'tshirt' %}
-                <img src="{% static 'images/products/tshirt.png' %}" alt="{{ product.name }}"
+                <img src="{% static 'images/products/tshirt.png' %}" alt="{{ product.localized_name|default:product.name }}"
                     class="w-full h-full object-cover">
                 {% else %}
-                <img src="{% static 'images/products/mens_shirt.png' %}" alt="{{ product.name }}"
+                <img src="{% static 'images/products/mens_shirt.png' %}" alt="{{ product.localized_name|default:product.name }}"
                     class="w-full h-full object-cover">
                 {% endif %}
 
@@ -129,10 +129,10 @@
             <!-- Product Info -->
             <div class="p-6 relative">
                 <div class="flex items-start justify-between mb-3">
-                    <h3 class="font-bold text-xl text-gray-900 group-hover:text-[#2E5FA3] transition">{{ product.name }}
+                    <h3 class="font-bold text-xl text-gray-900 group-hover:text-[#2E5FA3] transition">{{ product.localized_name|default:product.name }}
                     </h3>
                 </div>
-                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ product.description|truncatewords:12 }}</p>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ product.localized_description|default:product.description|truncatewords:12 }}</p>
 
                 <div class="flex items-center justify-between mb-5">
                     <div>
@@ -143,10 +143,10 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
-                            {{ product.gender|title }}
+                            {{ product.localized_gender|default:product.gender|title }}
                         </span>
                         <span class="px-3 py-1 bg-[#EAF3F8] text-[#1B3A6B] text-xs font-medium rounded-full">
-                            {{ product.category|title }}
+                            {{ product.localized_category|default:product.category|title }}
                         </span>
                     </div>
                 </div>
@@ -194,10 +194,7 @@
         </div>
         <div class="relative p-12 text-center">
             <h2 class="text-4xl font-extrabold text-white mb-4">{% trans "Not Sure About Your Size?" %}</h2>
-            <p class="text-xl text-white/95 mb-8 max-w-2xl mx-auto">
-                Try our AI-powered virtual fitting system for personalized size recommendations and perfect
-                fit!
-            </p>
+            <p class="text-xl text-white/95 mb-8 max-w-2xl mx-auto">{% trans "Try our AI-powered virtual fitting system for personalized size recommendations and perfect fit!" %}</p>
             <a href="{% url 'fitting_system:scan' %}"
                 class="inline-flex items-center gap-3 bg-white text-[#1B3A6B] px-10 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

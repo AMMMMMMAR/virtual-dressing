@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.utils.translation import gettext as _
 import json
 import base64
 import numpy as np
@@ -34,6 +35,20 @@ def decode_base64_image(base64_string):
     return image_array
 
 
+SKIN_TONE_LABELS = {
+    'very_light': _("Very Light"),
+    'light': _("Light"),
+    'intermediate': _("Intermediate"),
+    'tan': _("Tan"),
+    'dark': _("Dark"),
+}
+
+UNDERTONE_LABELS = {
+    'warm': _("Warm"),
+    'cool': _("Cool"),
+}
+
+
 # ---------------------------------------------------------------------------
 # Page views
 # ---------------------------------------------------------------------------
@@ -60,7 +75,7 @@ def analyze_frame(request):
     mode='face'  → face detection (skin-tone selfie step)
     """
     if request.method != 'POST':
-        return JsonResponse({'error': 'POST method required'}, status=400)
+        return JsonResponse({'error': _('POST method required')}, status=400)
 
     try:
         data       = json.loads(request.body)
@@ -68,7 +83,7 @@ def analyze_frame(request):
         mode       = data.get('mode', 'body')
 
         if not image_data:
-            return JsonResponse({'error': 'Image is required'}, status=400)
+            return JsonResponse({'error': _('Image is required')}, status=400)
 
         image   = decode_base64_image(image_data)
         analyzer = get_yolo_analyzer()
@@ -97,7 +112,7 @@ def process_scan(request):
     Then ask the LLM for a recommended size letter.
     """
     if request.method != 'POST':
-        return JsonResponse({'error': 'POST method required'}, status=400)
+        return JsonResponse({'error': _('POST method required')}, status=400)
 
     try:
         data = json.loads(request.body)
@@ -108,19 +123,19 @@ def process_scan(request):
         user_height_cm   = data.get('user_height_cm')
 
         if not front_image_data:
-            return JsonResponse({'error': 'Front (body) image is required'}, status=400)
+            return JsonResponse({'error': _('Front (body) image is required')}, status=400)
         if not face_image_data:
-            return JsonResponse({'error': 'Face image is required for skin tone detection'}, status=400)
+            return JsonResponse({'error': _('Face image is required for skin tone detection')}, status=400)
 
         # Validate user height
         if user_height_cm is None:
-            return JsonResponse({'error': 'Height is required. Please enter your height in cm.'}, status=400)
+            return JsonResponse({'error': _('Height is required. Please enter your height in cm.')}, status=400)
         try:
             user_height_cm = float(user_height_cm)
         except (TypeError, ValueError):
-            return JsonResponse({'error': 'Height must be a valid number in cm.'}, status=400)
+            return JsonResponse({'error': _('Height must be a valid number in cm.')}, status=400)
         if user_height_cm < 100 or user_height_cm > 250:
-            return JsonResponse({'error': 'Height must be between 100 and 250 cm.'}, status=400)
+            return JsonResponse({'error': _('Height must be between 100 and 250 cm.')}, status=400)
 
         front_image = decode_base64_image(front_image_data)
         face_image  = decode_base64_image(face_image_data)
@@ -175,7 +190,7 @@ def process_scan(request):
             'success':          True,
             'session_id':       str(body_scan.session_id),
             'skin_tone':        skin_tone,
-            'skin_tone_display': skin_tone.replace('_', ' ').title(),
+            'skin_tone_display': SKIN_TONE_LABELS.get(skin_tone, skin_tone.replace('_', ' ').title()),
             'undertone':        undertone,
             'recommended_size': recommended_size,
             'confidence':       round(confidence, 2),
@@ -189,7 +204,7 @@ def process_scan(request):
         return JsonResponse({'error': str(e)}, status=503)
     except Exception as e:
         logger.exception(f"Unexpected error in process_scan: {e}")
-        return JsonResponse({'error': f'Processing failed: {str(e)}'}, status=500)
+        return JsonResponse({'error': _('Processing failed: %(error)s') % {'error': str(e)}}, status=500)
 
 
 # ---------------------------------------------------------------------------
@@ -205,7 +220,7 @@ def process_scan_women(request):
     Then ask the LLM for a recommended size letter.
     """
     if request.method != 'POST':
-        return JsonResponse({'error': 'POST method required'}, status=400)
+        return JsonResponse({'error': _('POST method required')}, status=400)
 
     try:
         data = json.loads(request.body)
@@ -214,18 +229,24 @@ def process_scan_women(request):
         measurements    = data.get('measurements', {})
 
         if not hand_image_data:
-            return JsonResponse({'error': 'Hand image is required for skin tone detection'}, status=400)
+            return JsonResponse({'error': _('Hand image is required for skin tone detection')}, status=400)
 
         # Validate required measurements
         required_fields = ['height', 'chest', 'waist', 'hip']
+        field_labels = {
+            'height': _("Height"),
+            'chest': _("Bust / Chest"),
+            'waist': _("Waist"),
+            'hip': _("Hip"),
+        }
         for field in required_fields:
             val = measurements.get(field)
             if val is None:
-                return JsonResponse({'error': f'{field.title()} is required.'}, status=400)
+                return JsonResponse({'error': _('%(field)s is required.') % {'field': field_labels.get(field, field.title())}}, status=400)
             try:
                 measurements[field] = float(val)
             except (TypeError, ValueError):
-                return JsonResponse({'error': f'{field.title()} must be a valid number.'}, status=400)
+                return JsonResponse({'error': _('%(field)s must be a valid number.') % {'field': field_labels.get(field, field.title())}}, status=400)
 
         # Convert optional fields to float if present
         optional_fields = ['shoulder_width', 'inseam', 'arm_length', 'torso_length']
@@ -242,7 +263,7 @@ def process_scan_women(request):
         # Validate height range
         height = measurements['height']
         if height < 100 or height > 250:
-            return JsonResponse({'error': 'Height must be between 100 and 250 cm.'}, status=400)
+            return JsonResponse({'error': _('Height must be between 100 and 250 cm.')}, status=400)
 
         hand_image = decode_base64_image(hand_image_data)
 
@@ -293,7 +314,7 @@ def process_scan_women(request):
             'success':          True,
             'session_id':       str(body_scan.session_id),
             'skin_tone':        skin_tone,
-            'skin_tone_display': skin_tone.replace('_', ' ').title(),
+            'skin_tone_display': SKIN_TONE_LABELS.get(skin_tone, skin_tone.replace('_', ' ').title()),
             'undertone':        undertone,
             'recommended_size': recommended_size,
             'confidence':       round(confidence, 2),
@@ -307,7 +328,7 @@ def process_scan_women(request):
         return JsonResponse({'error': str(e)}, status=503)
     except Exception as e:
         logger.exception(f"Unexpected error in process_scan_women: {e}")
-        return JsonResponse({'error': f'Processing failed: {str(e)}'}, status=500)
+        return JsonResponse({'error': _('Processing failed: %(error)s') % {'error': str(e)}}, status=500)
 
 
 # ---------------------------------------------------------------------------
@@ -342,8 +363,14 @@ def recommendations(request, session_id):
     context = {
         'body_scan':         body_scan,
         'recommended_size':  recommended_size,
-        'skin_tone_display': body_scan.skin_tone.replace('_', ' ').title(),
-        'undertone_display': body_scan.undertone.title(),
+        'skin_tone_display': SKIN_TONE_LABELS.get(
+            body_scan.skin_tone,
+            body_scan.skin_tone.replace('_', ' ').title(),
+        ),
+        'undertone_display': UNDERTONE_LABELS.get(
+            body_scan.undertone,
+            body_scan.undertone.title(),
+        ),
         'matching_products': matching_products,
         'selected_gender':   gender,
     }
@@ -472,8 +499,14 @@ def avatar(request, session_id):
         'skin_tone_index':  skin_info['index'],
         'skin_tone_hex':    skin_info['hex'],
         'skin_tone_label':  skin_info['label'],
-        'skin_tone_display': body_scan.skin_tone.replace('_', ' ').title(),
-        'undertone_display': body_scan.undertone.title(),
+        'skin_tone_display': SKIN_TONE_LABELS.get(
+            body_scan.skin_tone,
+            body_scan.skin_tone.replace('_', ' ').title(),
+        ),
+        'undertone_display': UNDERTONE_LABELS.get(
+            body_scan.undertone,
+            body_scan.undertone.title(),
+        ),
         'skin_tone_key':    skin_tone_key,
         'rec_shirt_hex':    rec_shirt_hex.lstrip('#'),
         'rec_pants_hex':    rec_pants_hex.lstrip('#'),
@@ -531,13 +564,47 @@ def store(request):
             Q(name__icontains=search) | Q(description__icontains=search)
         )
 
+    category_labels = {
+        'shirt': _("Shirt"),
+        'pants': _("Pants"),
+        'jacket': _("Jacket"),
+        'dress': _("Dress"),
+        'skirt': _("Skirt"),
+        't-shirt': _("T-Shirt"),
+        'tshirt': _("T-Shirt"),
+        'jeans': _("Jeans"),
+    }
+    gender_labels = {
+        'men': _("Men"),
+        'women': _("Women"),
+        'unisex': _("Unisex"),
+    }
+
+    products = list(products)
+    for product in products:
+        product.localized_name = _(product.name)
+        product.localized_description = _(product.description)
+        product.localized_category = category_labels.get(product.category, product.category.title())
+        product.localized_gender = gender_labels.get(product.gender, product.gender.title())
+
     categories = Product.objects.values_list('category', flat=True).distinct().order_by('category')
     genders    = Product.objects.values_list('gender', flat=True).distinct().order_by('gender')
+
+    category_options = [
+        {'value': c, 'label': category_labels.get(c, c.title())}
+        for c in categories
+    ]
+    gender_options = [
+        {'value': g, 'label': gender_labels.get(g, g.title())}
+        for g in genders
+    ]
 
     context = {
         'products':         products,
         'categories':       categories,
         'genders':          genders,
+        'category_options': category_options,
+        'gender_options':   gender_options,
         'selected_category': category,
         'selected_gender':  gender,
         'search_query':     search,

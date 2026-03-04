@@ -508,3 +508,312 @@ msgstr "درجة لونية"
 
 msgid "You can start over if needed"
 msgstr "يمكنك البدء من جديد إذا لزم الأمر"
+
+msgid "Analysing with AI..."
+msgstr "جارٍ التحليل بالذكاء الاصطناعي..."
+
+msgid "Arm Length"
+msgstr "طول الذراع"
+
+msgid "Back to Recommendations"
+msgstr "العودة إلى التوصيات"
+
+msgid "Based on your body scan"
+msgstr "بناءً على مسح جسمك"
+
+msgid "better accuracy"
+msgstr "دقة أفضل"
+
+msgid "Bust / Chest"
+msgstr "الصدر"
+
+msgid "Bust: measure around the fullest part of your chest"
+msgstr "الصدر: قِس حول أكثر جزء امتلاءً من الصدر."
+
+msgid "Color"
+msgstr "اللون"
+
+msgid "Colors update with your skin tone"
+msgstr "تتحدّث الألوان وفق لون بشرتك"
+
+msgid "Dark"
+msgstr "داكن"
+
+msgid "Detecting skin tone, recommending size..."
+msgstr "جارٍ اكتشاف لون البشرة واقتراح المقاس..."
+
+msgid "Drag to rotate · Scroll to zoom"
+msgstr "اسحب للتدوير · مرر للتكبير/التصغير"
+
+msgid "Drop hand photo here"
+msgstr "أسقط صورة اليد هنا"
+
+msgid "e.g. 165"
+msgstr "مثال: 165"
+
+msgid "e.g. 175"
+msgstr "مثال: 175"
+
+msgid "e.g. 38"
+msgstr "مثال: 38"
+
+msgid "e.g. 42"
+msgstr "مثال: 42"
+
+msgid "e.g. 56"
+msgstr "مثال: 56"
+
+msgid "e.g. 68"
+msgstr "مثال: 68"
+
+msgid "e.g. 76"
+msgstr "مثال: 76"
+
+msgid "e.g. 88"
+msgstr "مثال: 88"
+
+msgid "e.g. 96"
+msgstr "مثال: 96"
+
+msgid "Enter your body measurements and upload a hand photo for skin tone"
+msgstr "أدخلي قياسات جسمك وارفعي صورة ليدك لتحليل لون البشرة"
+
+msgid "Enter Your Measurements"
+msgstr "أدخلي قياساتك"
+
+msgid "Enter your measurements and upload a hand photo"
+msgstr "أدخلي قياساتك وارفعي صورة يد"
+
+msgid "Get My Size Recommendation"
+msgstr "احصل على توصية مقاسي"
+
+msgid "Get personalized clothing recommendations based on your body measurements and skin tone."
+msgstr "احصل على توصيات ملابس مخصصة بناءً على قياسات جسمك ولون بشرتك."
+
+msgid "Hand image ready"
+msgstr "صورة اليد جاهزة"
+
+msgid "Hand Photo for Skin Tone"
+msgstr "صورة اليد لتحليل لون البشرة"
+
+msgid "Hand photo: back of hand, natural light, no makeup or filters"
+msgstr "صورة اليد: ظهر اليد، إضاءة طبيعية، بدون مكياج أو فلاتر"
+
+msgid "Height"
+msgstr "الطول"
+
+msgid "Hip"
+msgstr "الورك"
+
+msgid "Hip: measure around the widest part of your hips"
+msgstr "الورك: قِس حول أعرض جزء من الورك."
+
+msgid "How to measure:"
+msgstr "كيفية القياس:"
+
+msgid "Inseam"
+msgstr "طول الساق الداخلي"
+
+msgid "Intermediate"
+msgstr "متوسط"
+
+msgid "Light"
+msgstr "فاتح"
+
+msgid "Loading 3D model..."
+msgstr "جارٍ تحميل النموذج ثلاثي الأبعاد..."
+
+msgid "No more guessing sizes!"
+msgstr "لا مزيد من تخمين المقاسات!"
+
+msgid "Optional Measurements"
+msgstr "قياسات اختيارية"
+
+msgid "Our AI analyzes your skin tone to recommend colors that complement you best, ensuring you look amazing."
+msgstr "يحلل ذكاؤنا الاصطناعي لون بشرتك لاقتراح الألوان الأكثر ملاءمة لك."
+
+msgid "Pants Color"
+msgstr "لون البنطال"
+
+msgid "Photo of the back of your hand, good lighting, no filters"
+msgstr "صورة لظهر اليد، إضاءة جيدة، بدون فلاتر"
+
+msgid "Please enter your bust/chest measurement."
+msgstr "يرجى إدخال قياس الصدر."
+
+msgid "Please enter your hip measurement."
+msgstr "يرجى إدخال قياس الورك."
+
+msgid "Please enter your waist measurement."
+msgstr "يرجى إدخال قياس الخصر."
+
+msgid "Please upload a hand photo for skin tone detection."
+msgstr "يرجى رفع صورة يد لاكتشاف لون البشرة."
+
+msgid "Receive personalized size and color recommendations from your available inventory."
+msgstr "احصل على توصيات مخصصة للمقاس واللون من المخزون المتاح."
+
+msgid "required – close-up face for skin tone"
+msgstr "مطلوب – صورة مقرّبة للوجه لتحليل لون البشرة"
+
+msgid "required – full body, front view"
+msgstr "مطلوب – الجسم كاملًا، من الأمام"
+
+msgid "Required Measurements"
+msgstr "القياسات المطلوبة"
+
+msgid "Shoulder Width"
+msgstr "عرض الكتفين"
+
+msgid "Skin Tone"
+msgstr "لون البشرة"
+
+msgid "Stand in front of the camera and let our AI analyze your body measurements using advanced pose detection technology."
+msgstr "قف أمام الكاميرا ودع الذكاء الاصطناعي يحلل قياسات جسمك بتقنية متقدمة لاكتشاف الوضعية."
+
+msgid "Suggested for your skin tone"
+msgstr "مقترح للون بشرتك"
+
+msgid "Tan"
+msgstr "قمحي"
+
+msgid "Tips for best results:"
+msgstr "نصائح لأفضل النتائج:"
+
+msgid "Torso Length"
+msgstr "طول الجذع"
+
+msgid "T-Shirt Color"
+msgstr "لون القميص"
+
+msgid "Use a soft measuring tape for best results"
+msgstr "استخدم شريط قياس مرن للحصول على أفضل النتائج"
+
+msgid "Very Light"
+msgstr "فاتح جدًا"
+
+msgid "View Your 3D Avatar"
+msgstr "عرض أفاتارك ثلاثي الأبعاد"
+
+msgid "Waist"
+msgstr "الخصر"
+
+msgid "Waist: measure around your natural waistline"
+msgstr "الخصر: قِس حول خط خصرك الطبيعي."
+
+msgid "Your 3D Avatar - Virtual Fitting System"
+msgstr "أفاتارك ثلاثي الأبعاد - نظام القياس الافتراضي"
+
+msgid "Your Recommendations - Virtual Fitting System"
+msgstr "توصياتك - نظام القياس الافتراضي"
+
+msgid "Your Skin Tone"
+msgstr "لون بشرتك"
+
+msgid "%(field)s is required."
+msgstr "%(field)s مطلوب."
+
+msgid "%(field)s must be a valid number."
+msgstr "يجب أن تكون %(field)s رقمًا صالحًا."
+
+msgid "Cool"
+msgstr "بارد"
+
+msgid "Face image is required for skin tone detection"
+msgstr "صورة الوجه مطلوبة لاكتشاف لون البشرة"
+
+msgid "Front (body) image is required"
+msgstr "صورة أمامية للجسم مطلوبة"
+
+msgid "Hand image is required for skin tone detection"
+msgstr "صورة اليد مطلوبة لاكتشاف لون البشرة"
+
+msgid "Height is required. Please enter your height in cm."
+msgstr "الطول مطلوب. يرجى إدخال طولك بالسنتيمتر."
+
+msgid "Height must be a valid number in cm."
+msgstr "يجب أن يكون الطول رقمًا صالحًا بالسنتيمتر."
+
+msgid "Height must be between 100 and 250 cm."
+msgstr "يجب أن يكون الطول بين 100 و250 سم."
+
+msgid "Image is required"
+msgstr "الصورة مطلوبة"
+
+msgid "POST method required"
+msgstr "مطلوب استخدام طريقة POST"
+
+msgid "Processing failed: %(error)s"
+msgstr "فشلت المعالجة: %(error)s"
+
+msgid "Warm"
+msgstr "دافئ"
+
+msgid "Stand 2-3 metres away from the camera"
+msgstr "قف على بُعد 2-3 أمتار من الكاميرا"
+
+msgid "Please enter a valid height (100-250 cm) before processing."
+msgstr "يرجى إدخال طول صحيح (100-250 سم) قبل المعالجة."
+
+msgid "required – close-up face for skin tone"
+msgstr "مطلوب – صورة مقرّبة للوجه لتحليل لون البشرة"
+
+msgid "required – full body, front view"
+msgstr "مطلوب – الجسم كاملًا، من الأمام"
+
+msgid "Drag to rotate · Scroll to zoom"
+msgstr "اسحب للتدوير · مرر للتكبير/التصغير"
+
+msgid "A timeless classic cotton shirt perfect for any occasion. Made from 100% premium cotton for maximum comfort and breathability."
+msgstr "قميص قطني كلاسيكي خالد مناسب لكل المناسبات. مصنوع من قطن فاخر 100% لراحة وتهوية قصوى."
+
+msgid "Comfortable denim jeans with a classic fit. Durable and stylish for everyday wear with premium denim fabric."
+msgstr "جينز دنيم مريح بقصّة كلاسيكية. متين وأنيق للاستخدام اليومي بقماش دنيم فاخر."
+
+msgid "Premium leather jacket with a classic design. Timeless piece that never goes out of style, crafted from genuine leather."
+msgstr "جاكيت جلدي فاخر بتصميم كلاسيكي. قطعة خالدة لا تخرج من الموضة، مصنوعة من جلد طبيعي."
+
+msgid "Sophisticated blouse with delicate details. Perfect for both office and evening wear with premium silk-like fabric."
+msgstr "بلوزة أنيقة بتفاصيل ناعمة. مثالية للعمل والمساء بقماش فاخر شبيه بالحرير."
+
+msgid "Relaxed oversized blouse with an elegant drape. Perfect for casual or smart-casual occasions with lightweight breathable fabric."
+msgstr "بلوزة واسعة ومريحة بانسيابية أنيقة. مثالية للمناسبات الكاجوال أو شبه الرسمية بقماش خفيف وقابل للتنفس."
+
+msgid "Tailored slim trousers with a flattering silhouette. Versatile for office or casual settings with a premium fabric blend."
+msgstr "بنطال ضيق مفصّل بقصة تبرز القوام. مناسب للعمل أو الإطلالات الكاجوال بخليط قماش فاخر."
+
+msgid "Classic Cotton Shirt"
+msgstr "قميص قطني كلاسيكي"
+
+msgid "Casual Denim Jeans"
+msgstr "جينز دنيم كاجوال"
+
+msgid "Oversized Blouse"
+msgstr "بلوزة واسعة"
+
+msgid "Slim Trousers"
+msgstr "بنطال ضيق"
+
+msgid "Shirt"
+msgstr "قميص"
+
+msgid "Pants"
+msgstr "بنطال"
+
+msgid "Jacket"
+msgstr "جاكيت"
+
+msgid "Dress"
+msgstr "فستان"
+
+msgid "Skirt"
+msgstr "تنورة"
+
+msgid "T-Shirt"
+msgstr "تي شيرت"
+
+msgid "Jeans"
+msgstr "جينز"
+
+msgid "Unisex"
+msgstr "للجنسين"

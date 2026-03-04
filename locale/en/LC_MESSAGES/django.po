@@ -514,3 +514,312 @@ msgstr "undertone"
 
 msgid "You can start over if needed"
 msgstr "You can start over if needed"
+
+msgid "Analysing with AI..."
+msgstr "Analysing with AI..."
+
+msgid "Arm Length"
+msgstr "Arm Length"
+
+msgid "Back to Recommendations"
+msgstr "Back to Recommendations"
+
+msgid "Based on your body scan"
+msgstr "Based on your body scan"
+
+msgid "better accuracy"
+msgstr "better accuracy"
+
+msgid "Bust / Chest"
+msgstr "Bust / Chest"
+
+msgid "Bust: measure around the fullest part of your chest"
+msgstr "Bust: measure around the fullest part of your chest"
+
+msgid "Color"
+msgstr "Color"
+
+msgid "Colors update with your skin tone"
+msgstr "Colors update with your skin tone"
+
+msgid "Dark"
+msgstr "Dark"
+
+msgid "Detecting skin tone, recommending size..."
+msgstr "Detecting skin tone, recommending size..."
+
+msgid "Drag to rotate · Scroll to zoom"
+msgstr "Drag to rotate · Scroll to zoom"
+
+msgid "Drop hand photo here"
+msgstr "Drop hand photo here"
+
+msgid "e.g. 165"
+msgstr "e.g. 165"
+
+msgid "e.g. 175"
+msgstr "e.g. 175"
+
+msgid "e.g. 38"
+msgstr "e.g. 38"
+
+msgid "e.g. 42"
+msgstr "e.g. 42"
+
+msgid "e.g. 56"
+msgstr "e.g. 56"
+
+msgid "e.g. 68"
+msgstr "e.g. 68"
+
+msgid "e.g. 76"
+msgstr "e.g. 76"
+
+msgid "e.g. 88"
+msgstr "e.g. 88"
+
+msgid "e.g. 96"
+msgstr "e.g. 96"
+
+msgid "Enter your body measurements and upload a hand photo for skin tone"
+msgstr "Enter your body measurements and upload a hand photo for skin tone"
+
+msgid "Enter Your Measurements"
+msgstr "Enter Your Measurements"
+
+msgid "Enter your measurements and upload a hand photo"
+msgstr "Enter your measurements and upload a hand photo"
+
+msgid "Get My Size Recommendation"
+msgstr "Get My Size Recommendation"
+
+msgid "Get personalized clothing recommendations based on your body measurements and skin tone."
+msgstr "Get personalized clothing recommendations based on your body measurements and skin tone."
+
+msgid "Hand image ready"
+msgstr "Hand image ready"
+
+msgid "Hand Photo for Skin Tone"
+msgstr "Hand Photo for Skin Tone"
+
+msgid "Hand photo: back of hand, natural light, no makeup or filters"
+msgstr "Hand photo: back of hand, natural light, no makeup or filters"
+
+msgid "Height"
+msgstr "Height"
+
+msgid "Hip"
+msgstr "Hip"
+
+msgid "Hip: measure around the widest part of your hips"
+msgstr "Hip: measure around the widest part of your hips"
+
+msgid "How to measure:"
+msgstr "How to measure:"
+
+msgid "Inseam"
+msgstr "Inseam"
+
+msgid "Intermediate"
+msgstr "Intermediate"
+
+msgid "Light"
+msgstr "Light"
+
+msgid "Loading 3D model..."
+msgstr "Loading 3D model..."
+
+msgid "No more guessing sizes!"
+msgstr "No more guessing sizes!"
+
+msgid "Optional Measurements"
+msgstr "Optional Measurements"
+
+msgid "Our AI analyzes your skin tone to recommend colors that complement you best, ensuring you look amazing."
+msgstr "Our AI analyzes your skin tone to recommend colors that complement you best, ensuring you look amazing."
+
+msgid "Pants Color"
+msgstr "Pants Color"
+
+msgid "Photo of the back of your hand, good lighting, no filters"
+msgstr "Photo of the back of your hand, good lighting, no filters"
+
+msgid "Please enter your bust/chest measurement."
+msgstr "Please enter your bust/chest measurement."
+
+msgid "Please enter your hip measurement."
+msgstr "Please enter your hip measurement."
+
+msgid "Please enter your waist measurement."
+msgstr "Please enter your waist measurement."
+
+msgid "Please upload a hand photo for skin tone detection."
+msgstr "Please upload a hand photo for skin tone detection."
+
+msgid "Receive personalized size and color recommendations from your available inventory."
+msgstr "Receive personalized size and color recommendations from your available inventory."
+
+msgid "required – close-up face for skin tone"
+msgstr "required – close-up face for skin tone"
+
+msgid "required – full body, front view"
+msgstr "required – full body, front view"
+
+msgid "Required Measurements"
+msgstr "Required Measurements"
+
+msgid "Shoulder Width"
+msgstr "Shoulder Width"
+
+msgid "Skin Tone"
+msgstr "Skin Tone"
+
+msgid "Stand in front of the camera and let our AI analyze your body measurements using advanced pose detection technology."
+msgstr "Stand in front of the camera and let our AI analyze your body measurements using advanced pose detection technology."
+
+msgid "Suggested for your skin tone"
+msgstr "Suggested for your skin tone"
+
+msgid "Tan"
+msgstr "Tan"
+
+msgid "Tips for best results:"
+msgstr "Tips for best results:"
+
+msgid "Torso Length"
+msgstr "Torso Length"
+
+msgid "T-Shirt Color"
+msgstr "T-Shirt Color"
+
+msgid "Use a soft measuring tape for best results"
+msgstr "Use a soft measuring tape for best results"
+
+msgid "Very Light"
+msgstr "Very Light"
+
+msgid "View Your 3D Avatar"
+msgstr "View Your 3D Avatar"
+
+msgid "Waist"
+msgstr "Waist"
+
+msgid "Waist: measure around your natural waistline"
+msgstr "Waist: measure around your natural waistline"
+
+msgid "Your 3D Avatar - Virtual Fitting System"
+msgstr "Your 3D Avatar - Virtual Fitting System"
+
+msgid "Your Recommendations - Virtual Fitting System"
+msgstr "Your Recommendations - Virtual Fitting System"
+
+msgid "Your Skin Tone"
+msgstr "Your Skin Tone"
+
+msgid "%(field)s is required."
+msgstr "%(field)s is required."
+
+msgid "%(field)s must be a valid number."
+msgstr "%(field)s must be a valid number."
+
+msgid "Cool"
+msgstr "Cool"
+
+msgid "Face image is required for skin tone detection"
+msgstr "Face image is required for skin tone detection"
+
+msgid "Front (body) image is required"
+msgstr "Front (body) image is required"
+
+msgid "Hand image is required for skin tone detection"
+msgstr "Hand image is required for skin tone detection"
+
+msgid "Height is required. Please enter your height in cm."
+msgstr "Height is required. Please enter your height in cm."
+
+msgid "Height must be a valid number in cm."
+msgstr "Height must be a valid number in cm."
+
+msgid "Height must be between 100 and 250 cm."
+msgstr "Height must be between 100 and 250 cm."
+
+msgid "Image is required"
+msgstr "Image is required"
+
+msgid "POST method required"
+msgstr "POST method required"
+
+msgid "Processing failed: %(error)s"
+msgstr "Processing failed: %(error)s"
+
+msgid "Warm"
+msgstr "Warm"
+
+msgid "Stand 2-3 metres away from the camera"
+msgstr "Stand 2-3 metres away from the camera"
+
+msgid "Please enter a valid height (100-250 cm) before processing."
+msgstr "Please enter a valid height (100-250 cm) before processing."
+
+msgid "required – close-up face for skin tone"
+msgstr "required – close-up face for skin tone"
+
+msgid "required – full body, front view"
+msgstr "required – full body, front view"
+
+msgid "Drag to rotate · Scroll to zoom"
+msgstr "Drag to rotate · Scroll to zoom"
+
+msgid "A timeless classic cotton shirt perfect for any occasion. Made from 100% premium cotton for maximum comfort and breathability."
+msgstr "A timeless classic cotton shirt perfect for any occasion. Made from 100% premium cotton for maximum comfort and breathability."
+
+msgid "Comfortable denim jeans with a classic fit. Durable and stylish for everyday wear with premium denim fabric."
+msgstr "Comfortable denim jeans with a classic fit. Durable and stylish for everyday wear with premium denim fabric."
+
+msgid "Premium leather jacket with a classic design. Timeless piece that never goes out of style, crafted from genuine leather."
+msgstr "Premium leather jacket with a classic design. Timeless piece that never goes out of style, crafted from genuine leather."
+
+msgid "Sophisticated blouse with delicate details. Perfect for both office and evening wear with premium silk-like fabric."
+msgstr "Sophisticated blouse with delicate details. Perfect for both office and evening wear with premium silk-like fabric."
+
+msgid "Relaxed oversized blouse with an elegant drape. Perfect for casual or smart-casual occasions with lightweight breathable fabric."
+msgstr "Relaxed oversized blouse with an elegant drape. Perfect for casual or smart-casual occasions with lightweight breathable fabric."
+
+msgid "Tailored slim trousers with a flattering silhouette. Versatile for office or casual settings with a premium fabric blend."
+msgstr "Tailored slim trousers with a flattering silhouette. Versatile for office or casual settings with a premium fabric blend."
+
+msgid "Classic Cotton Shirt"
+msgstr "Classic Cotton Shirt"
+
+msgid "Casual Denim Jeans"
+msgstr "Casual Denim Jeans"
+
+msgid "Oversized Blouse"
+msgstr "Oversized Blouse"
+
+msgid "Slim Trousers"
+msgstr "Slim Trousers"
+
+msgid "Shirt"
+msgstr "Shirt"
+
+msgid "Pants"
+msgstr "Pants"
+
+msgid "Jacket"
+msgstr "Jacket"
+
+msgid "Dress"
+msgstr "Dress"
+
+msgid "Skirt"
+msgstr "Skirt"
+
+msgid "T-Shirt"
+msgstr "T-Shirt"
+
+msgid "Jeans"
+msgstr "Jeans"
+
+msgid "Unisex"
+msgstr "Unisex"

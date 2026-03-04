@@ -16,8 +16,8 @@
                     </span>
                 </h1>
                 <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                    Get personalized clothing recommendations based on your body measurements and skin tone.
-                    No more guessing sizes!
+                    {% trans "Get personalized clothing recommendations based on your body measurements and skin tone." %}
+                    {% trans "No more guessing sizes!" %}
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="{% url 'fitting_system:scan' %}"
                         class="bg-white text-[#1B3A6B] px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl transition transform hover:scale-105 inline-flex items-center justify-center">
@@ -74,8 +74,7 @@
                 </svg>
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "1. Body Scan" %}</h3>
-            <p class="text-gray-600">Stand in front of the camera and let our AI analyze your body
-                measurements using advanced pose detection technology.</p>
+            <p class="text-gray-600">{% trans "Stand in front of the camera and let our AI analyze your body measurements using advanced pose detection technology." %}</p>
         </div>
 
         <!-- Feature 2 -->
@@ -89,8 +88,7 @@
                 </svg>
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "2. Skin Tone Analysis" %}</h3>
-            <p class="text-gray-600">Our AI analyzes your skin tone to recommend colors that complement you
-                best, ensuring you look amazing.</p>
+            <p class="text-gray-600">{% trans "Our AI analyzes your skin tone to recommend colors that complement you best, ensuring you look amazing." %}</p>
         </div>
 
         <!-- Feature 3 -->
@@ -103,8 +101,7 @@
                 </svg>
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-3">{% trans "3. Get Recommendations" %}</h3>
-            <p class="text-gray-600">Receive personalized size and color recommendations from your available inventory.
-            </p>
+            <p class="text-gray-600">{% trans "Receive personalized size and color recommendations from your available inventory." %}</p>
         </div>
     </div>
 </div>
