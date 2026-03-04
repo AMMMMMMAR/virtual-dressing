@@ -1,0 +1,18 @@
+.git
+.gitignore
+.vscode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+.env
+venv
+media
+staticfiles
+pip_log.txt
+conflicts.txt
+*.ipynb
+image testing
+githup-projects

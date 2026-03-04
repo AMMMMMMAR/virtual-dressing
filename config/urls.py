@@ -31,8 +31,8 @@ urlpatterns += i18n_patterns(
     prefix_default_language=False,
 )
 
-# Serve media files in development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# WhiteNoise serves STATIC_URL in production.
+# Keep media URL mapping available for container deployments where legacy media
+# files may still be referenced.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

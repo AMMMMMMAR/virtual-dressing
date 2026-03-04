@@ -1,7 +1,25 @@
-i want to make an update in the try virtual fitting what do you suggest for me. for example taking the measurement it can be from 2-3 miter but for the skin tone it is hard to get it from that distance so you can make the skin tone next step taking as a selfy photo, after taking the measurement.
+---
+title: Virtual Dressing
+emoji: shirt
+colorFrom: blue
+colorTo: cyan
+sdk: docker
+app_port: 7860
+---
+
 # Intelligent In-Store Virtual Fitting System
 
 An AI-powered virtual fitting system for men's and women's clothing stores. The system uses computer vision to estimate body measurements and skin tone, then provides intelligent clothing recommendations based on available inventory.
+
+## Hugging Face Spaces (Docker)
+
+This repository is configured to run on Hugging Face Spaces using Docker.
+
+- Runtime port: `7860`
+- Container entrypoint: `gunicorn config.wsgi:application`
+- Startup tasks: `migrate` + `collectstatic` before server start
+
+Required Space variables are documented in the deployment guide/checklist provided in this chat.
 
 ## Features
 
