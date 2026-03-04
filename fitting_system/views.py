@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.utils.translation import gettext as _
 import json
 import base64
+import re
 import numpy as np
 import cv2
 from io import BytesIO
@@ -47,6 +48,26 @@ UNDERTONE_LABELS = {
     'warm': _("Warm"),
     'cool': _("Cool"),
 }
+
+
+def _translate_dynamic_label(value: str) -> str:
+    """
+    Translate dynamic labels from DB.
+    Handles both plain strings and mistakenly stored template tags
+    like "{% trans 'AVAILABLE COLOR' %}".
+    """
+    if not value:
+        return value
+    cleaned = value.strip()
+    m = re.fullmatch(r"\{\%\s*trans\s+['\"](.+?)['\"]\s*\%\}", cleaned, flags=re.IGNORECASE)
+    if m:
+        cleaned = m.group(1).strip()
+    # Be tolerant of malformed template-like strings saved in DB
+    elif '{%' in cleaned and '%}' in cleaned:
+        q = re.search(r"['\"](.+?)['\"]", cleaned)
+        if q:
+            cleaned = q.group(1).strip()
+    return _(cleaned)
 
 
 # ---------------------------------------------------------------------------
@@ -384,6 +405,17 @@ def _get_matching_products(recommended_size: str, gender=None, preferred_colors=
     When preferred_colors is provided, prefer variants whose color matches
     the skin-tone palette so product cards sync with the avatar.
     """
+    category_labels = {
+        'shirt': _("Shirt"),
+        'pants': _("Pants"),
+        'jacket': _("Jacket"),
+        'dress': _("Dress"),
+        'skirt': _("Skirt"),
+        't-shirt': _("T-Shirt"),
+        'tshirt': _("T-Shirt"),
+        'jeans': _("Jeans"),
+    }
+
     if gender and gender in ['men', 'women']:
         products = Product.objects.filter(Q(gender=gender) | Q(gender='unisex'))
     else:
@@ -410,9 +442,11 @@ def _get_matching_products(recommended_size: str, gender=None, preferred_colors=
         if variant:
             results.append({
                 'product':          product,
+                'product_name':     _(product.name),
+                'category_label':   category_labels.get(product.category, product.category.title()),
                 'variant':          variant,
                 'recommended_size': recommended_size,
-                'color_name':       variant.color.name,
+                'color_name':       _translate_dynamic_label(variant.color.name),
                 'color_hex':        variant.color.hex_code,
             })
 

@@ -817,3 +817,120 @@ msgstr "جينز"
 
 msgid "Unisex"
 msgstr "للجنسين"
+
+msgid "Almost Black"
+msgstr "أسود داكن جدًا"
+
+msgid "Amber"
+msgstr "كهرماني"
+
+msgid "Ash Grey"
+msgstr "رمادي فاتح"
+
+msgid "Baby Blue"
+msgstr "أزرق سماوي فاتح"
+
+msgid "Black"
+msgstr "أسود"
+
+msgid "Blush Pink"
+msgstr "وردي فاتح"
+
+msgid "Bright Orange"
+msgstr "برتقالي ساطع"
+
+msgid "Burgundy"
+msgstr "عنابي"
+
+msgid "Burnt Orange"
+msgstr "برتقالي محروق"
+
+msgid "Charcoal"
+msgstr "رمادي فحمي"
+
+msgid "Cobalt"
+msgstr "أزرق كوبالت"
+
+msgid "Cream"
+msgstr "كريمي"
+
+msgid "Dark Slate"
+msgstr "أردوازي داكن"
+
+msgid "Dark Teal"
+msgstr "أخضر مزرق داكن"
+
+msgid "Deep Green"
+msgstr "أخضر داكن"
+
+msgid "Deep Navy"
+msgstr "كحلي داكن"
+
+msgid "Electric Blue"
+msgstr "أزرق كهربائي"
+
+msgid "Graphite"
+msgstr "رمادي جرافيتي"
+
+msgid "Hot Pink"
+msgstr "وردي فاقع"
+
+msgid "Indigo"
+msgstr "نيلي"
+
+msgid "Khaki"
+msgstr "كاكي"
+
+msgid "Lavender"
+msgstr "لافندر"
+
+msgid "Lemon"
+msgstr "ليموني"
+
+msgid "Mahogany"
+msgstr "ماهوجني"
+
+msgid "Mint Green"
+msgstr "أخضر نعناعي"
+
+msgid "Mocha"
+msgstr "موكا"
+
+msgid "Navy"
+msgstr "كحلي"
+
+msgid "Ocean Blue"
+msgstr "أزرق محيطي"
+
+msgid "Off-White"
+msgstr "أوف وايت"
+
+msgid "Olive Green"
+msgstr "أخضر زيتوني"
+
+msgid "Pearl"
+msgstr "لؤلؤي"
+
+msgid "Plum"
+msgstr "برقوقي"
+
+msgid "Rose"
+msgstr "وردي"
+
+msgid "Sand"
+msgstr "رملي"
+
+msgid "Silver"
+msgstr "فضي"
+
+msgid "Sky Blue"
+msgstr "أزرق سماوي"
+
+msgid "Slate"
+msgstr "أردوازي"
+
+msgid "Walnut"
+msgstr "بني جوزي"
+
+msgid "White"
+msgstr "أبيض"

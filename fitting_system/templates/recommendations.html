@@ -130,25 +130,25 @@
                 <!-- Product image: Priority to uploaded image, then fallback to static defaults -->
                 <div class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
                     {% if item.product.image %}
-                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}"
                         class="w-full h-full object-cover">
                     {% elif item.product.category == 'shirt' and item.product.gender == 'men' %}
-                    <img src="{% static 'images/products/mens_shirt.png' %}" alt="{{ item.product.name }}"
+                    <img src="{% static 'images/products/mens_shirt.png' %}" alt="{{ item.product_name }}"
                         class="w-full h-full object-cover">
                     {% elif item.product.category == 'shirt' and item.product.gender == 'women' %}
-                    <img src="{% static 'images/products/blouse.png' %}" alt="{{ item.product.name }}"
+                    <img src="{% static 'images/products/blouse.png' %}" alt="{{ item.product_name }}"
                         class="w-full h-full object-cover">
                     {% elif item.product.category == 'pants' or item.product.category == 'jeans' %}
-                    <img src="{% static 'images/products/jeans.png' %}" alt="{{ item.product.name }}"
+                    <img src="{% static 'images/products/jeans.png' %}" alt="{{ item.product_name }}"
                         class="w-full h-full object-cover">
                     {% elif item.product.category == 'dress' %}
-                    <img src="{% static 'images/products/womens_dress.png' %}" alt="{{ item.product.name }}"
+                    <img src="{% static 'images/products/womens_dress.png' %}" alt="{{ item.product_name }}"
                         class="w-full h-full object-cover">
                     {% elif item.product.category == 'jacket' %}
-                    <img src="{% static 'images/products/jacket.png' %}" alt="{{ item.product.name }}"
+                    <img src="{% static 'images/products/jacket.png' %}" alt="{{ item.product_name }}"
                         class="w-full h-full object-cover">
                     {% else %}
-                    <img src="{% static 'images/products/mens_shirt.png' %}" alt="{{ item.product.name }}"
+                    <img src="{% static 'images/products/mens_shirt.png' %}" alt="{{ item.product_name }}"
                         class="w-full h-full object-cover">
                     {% endif %}
 
@@ -156,14 +156,14 @@
                     <div class="absolute top-3 right-3">
                         <span
                             class="px-3 py-1 bg-white/90 backdrop-blur-sm text-[#1B3A6B] text-xs font-semibold rounded-full shadow capitalize">
-                            {{ item.product.category }}
+                            {{ item.category_label }}
                         </span>
                     </div>
                 </div>
 
                 <!-- Product info -->
                 <div class="p-5">
-                    <h3 class="font-bold text-lg text-gray-900 mb-4">{{ item.product.name }}</h3>
+                    <h3 class="font-bold text-lg text-gray-900 mb-4">{{ item.product_name }}</h3>
 
                     <!-- Size -->
                     <div class="flex items-center gap-3 mb-3">
