@@ -327,8 +327,17 @@ def recommendations(request, session_id):
     if gender and gender not in ['men', 'women']:
         gender = None
 
+    # Get skin-tone-recommended color names so product cards sync with avatar
+    from .color_palettes import get_shirt_color_names, get_pants_color_names
+    preferred_colors = (
+        get_shirt_color_names(body_scan.skin_tone)
+        + get_pants_color_names(body_scan.skin_tone)
+    )
+
     # Match products whose variants have the recommended size in stock
-    matching_products = _get_matching_products(recommended_size, gender, limit=12)
+    matching_products = _get_matching_products(
+        recommended_size, gender, preferred_colors=preferred_colors, limit=12,
+    )
 
     context = {
         'body_scan':         body_scan,
@@ -341,23 +350,35 @@ def recommendations(request, session_id):
     return render(request, 'recommendations.html', context)
 
 
-def _get_matching_products(recommended_size: str, gender=None, limit=12):
+def _get_matching_products(recommended_size: str, gender=None, preferred_colors=None, limit=12):
     """
     Return products that have the recommended size in stock.
     Each item in the list is a dict with product + variant info.
+    When preferred_colors is provided, prefer variants whose color matches
+    the skin-tone palette so product cards sync with the avatar.
     """
     if gender and gender in ['men', 'women']:
         products = Product.objects.filter(Q(gender=gender) | Q(gender='unisex'))
     else:
         products = Product.objects.all()
 
+    preferred_set = set(preferred_colors) if preferred_colors else set()
+
     results = []
     for product in products:
-        variant = ProductVariant.objects.filter(
+        base_qs = ProductVariant.objects.filter(
             product=product,
             size__name=recommended_size,
             inventory__quantity__gt=0,
-        ).select_related('size', 'color', 'product').first()
+        ).select_related('size', 'color', 'product')
+
+        # Try to find a variant whose color is in the preferred palette first
+        variant = None
+        if preferred_set:
+            variant = base_qs.filter(color__name__in=preferred_set).first()
+        # Fall back to any available variant
+        if not variant:
+            variant = base_qs.first()
 
         if variant:
             results.append({
